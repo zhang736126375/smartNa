@@ -1,0 +1,2 @@
+ninja: Entering directory `/Users/zhangmin/AndroidStudioProjects/smartNa/core/.cxx/Debug/732n4351/x86'
+ninja: no work to do.

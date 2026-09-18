@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SmartNa" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/blue_primary</item>
+        <item name="colorPrimaryVariant">@color/blue_deep</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/blue_primary</item>
+        <item name="colorSecondaryVariant">@color/blue_deep</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:statusBarColor">@color/bg_gray</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/bg_gray</item>
+        <item name="android:navigationBarColor">@color/card_white</item>
+        <item name="android:textColorPrimary">@color/text_dark</item>
+        <item name="bottomNavigationStyle">@style/Widget.SmartNa.BottomNav</item>
+    </style>
+
+    <style name="Theme.SmartNa.Login" parent="Theme.SmartNa">
+        <item name="android:statusBarColor">@color/space_black</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/space_black</item>
+        <item name="android:navigationBarColor">@color/card_white</item>
+    </style>
+
+    <style name="Widget.SmartNa.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconTint">@color/selector_tab_color</item>
+        <item name="itemTextColor">@color/selector_tab_color</item>
+        <item name="elevation">0dp</item>
+        <item name="backgroundTint">@color/card_white</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemRippleColor">@android:color/transparent</item>
+    </style>
+</resources>

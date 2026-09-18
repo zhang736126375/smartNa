@@ -1,0 +1,2 @@
+-keep class com.blankj.utilcode.** { *; }
+-dontwarn com.blankj.utilcode.**

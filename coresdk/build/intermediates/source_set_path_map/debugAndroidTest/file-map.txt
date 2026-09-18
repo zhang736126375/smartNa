@@ -1,0 +1,8 @@
+com.bingo.coresdk.test.coresdk-tracing-1.1.0-0 /Users/zhangmin/.gradle/caches/transforms-3/2ae755c157090523cb1c86c6803d76db/transformed/tracing-1.1.0/res
+com.bingo.coresdk.test.coresdk-core-1.7.0-1 /Users/zhangmin/.gradle/caches/transforms-3/9c23ce4cc4f57d60be488ba8d51930ea/transformed/core-1.7.0/res
+com.bingo.coresdk.test.coresdk-packaged_res-2 /Users/zhangmin/AndroidStudioProjects/smartNa/core/build/intermediates/packaged_res/debug
+com.bingo.coresdk.test.coresdk-androidTest-3 /Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/build/generated/res/resValues/androidTest/debug
+com.bingo.coresdk.test.coresdk-mergeDebugAndroidTestResources-4 /Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+com.bingo.coresdk.test.coresdk-mergeDebugAndroidTestResources-5 /Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+com.bingo.coresdk.test.coresdk-merged_res-6 /Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/build/intermediates/merged_res/debugAndroidTest
+com.bingo.coresdk.test.coresdk-packaged_res-7 /Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/build/intermediates/packaged_res/debug

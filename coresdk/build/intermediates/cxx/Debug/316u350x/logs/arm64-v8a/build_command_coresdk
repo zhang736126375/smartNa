@@ -1,0 +1,4 @@
+/Users/zhangmin/Library/Android/sdk/cmake/3.22.1/bin/ninja \
+  -C \
+  /Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/.cxx/Debug/316u350x/arm64-v8a \
+  coresdk

@@ -1,0 +1,26 @@
+{
+  "installationFolder": "/Users/zhangmin/AndroidStudioProjects/smartNa/core/build/intermediates/prefab_package/debug/prefab",
+  "gradlePath": ":core",
+  "packageInfo": {
+    "packageName": "core",
+    "packageSchemaVersion": 2,
+    "packageDependencies": [],
+    "modules": [
+      {
+        "moduleName": "core",
+        "moduleHeaders": "/Users/zhangmin/AndroidStudioProjects/smartNa/core/src/main/cpp/include",
+        "moduleExportLibraries": [],
+        "abis": [
+          {
+            "abiName": "x86",
+            "abiApi": 24,
+            "abiNdkMajor": 25,
+            "abiStl": "c++_shared",
+            "abiLibrary": "/Users/zhangmin/AndroidStudioProjects/smartNa/core/build/intermediates/cxx/Debug/732n4351/obj/x86/libcore.so",
+            "abiAndroidGradleBuildJsonFile": "/Users/zhangmin/AndroidStudioProjects/smartNa/core/.cxx/Debug/732n4351/x86/android_gradle_build.json"
+          }
+        ]
+      }
+    ]
+  }
+}

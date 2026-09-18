@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_hall"
+        android:icon="@drawable/ic_tab_hall"
+        android:title="@string/tab_hall" />
+    <item
+        android:id="@+id/nav_tasks"
+        android:icon="@drawable/ic_tab_tasks"
+        android:title="@string/tab_tasks" />
+    <item
+        android:id="@+id/nav_device"
+        android:icon="@drawable/ic_tab_device"
+        android:title="@string/tab_device" />
+    <item
+        android:id="@+id/nav_wallet"
+        android:icon="@drawable/ic_tab_wallet"
+        android:title="@string/tab_wallet" />
+    <item
+        android:id="@+id/nav_mine"
+        android:icon="@drawable/ic_tab_mine"
+        android:title="@string/tab_mine" />
+</menu>

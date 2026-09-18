@@ -1,0 +1,17 @@
+{
+  "installationFolder": "/Users/zhangmin/AndroidStudioProjects/smartNa/core/build/intermediates/prefab_package/release/prefab",
+  "gradlePath": ":core",
+  "packageInfo": {
+    "packageName": "core",
+    "packageSchemaVersion": 2,
+    "packageDependencies": [],
+    "modules": [
+      {
+        "moduleName": "core",
+        "moduleHeaders": "/Users/zhangmin/AndroidStudioProjects/smartNa/core/src/main/cpp/include",
+        "moduleExportLibraries": [],
+        "abis": []
+      }
+    ]
+  }
+}

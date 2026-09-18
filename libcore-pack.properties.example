@@ -1,0 +1,2 @@
+# 可选：覆盖默认 libcore-pack 路径（默认使用工程根目录 libcore-pack/）
+# libcore.pack.dir=/absolute/path/to/libcore-pack

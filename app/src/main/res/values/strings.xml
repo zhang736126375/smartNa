@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">帮帮做</string>
+
+    <string name="login_slogan_1">你的每一次帮忙</string>
+    <string name="login_slogan_2">都在教机器人做事</string>
+    <string name="login_title">个人登录</string>
+    <string name="login_subtitle">未注册手机号将自动创建账号</string>
+    <string name="login_phone_prefix">+86</string>
+    <string name="login_phone_hint">请输入你的手机号</string>
+    <string name="login_code_hint">输入验证码</string>
+    <string name="login_get_code">获取验证码</string>
+    <string name="login_code_countdown">%1$ds</string>
+    <string name="login_submit">登录/注册</string>
+    <string name="login_agree_prefix">已阅读并同意</string>
+    <string name="login_agree_user">《用户服务协议》</string>
+    <string name="login_agree_and">和</string>
+    <string name="login_agree_privacy">《隐私政策》</string>
+    <string name="login_age">且确认本人已年满18周岁</string>
+    <string name="login_enterprise">我是企业用户 &gt;</string>
+    <string name="login_code_sent">验证码已发送（演示：输入任意4位）</string>
+    <string name="login_enterprise_toast">企业用户入口（Demo 占位）</string>
+
+    <string name="tab_hall">任务大厅</string>
+    <string name="tab_tasks">我的任务</string>
+    <string name="tab_device">设备</string>
+    <string name="tab_wallet">钱包</string>
+    <string name="tab_mine">我的</string>
+
+    <string name="hall_search_hint">输入场景/任务名称</string>
+    <string name="hall_filter_duration">时长</string>
+    <string name="hall_filter_sort">推荐排序</string>
+    <string name="hall_duration_all">全部时长</string>
+    <string name="hall_duration_le30">30分钟以内</string>
+    <string name="hall_duration_gt30">30分钟以上</string>
+    <string name="hall_sort_recommend">推荐排序</string>
+    <string name="hall_sort_quota">剩余名额最多</string>
+    <string name="hall_sort_reward">金额最高</string>
+    <string name="hall_quota_suffix"> 剩余名额</string>
+    <string name="hall_claim">领取</string>
+    <string name="hall_claimed">已领取</string>
+    <string name="hall_full">已满</string>
+
+    <string name="tasks_empty">暂无相关任务</string>
+    <string name="tasks_go_claim">去领取任务</string>
+    <string name="tasks_hint_in_progress">已完成采集，请提交审核</string>
+    <string name="tasks_hint_reviewing">平台审核中，请耐心等待</string>
+    <string name="tasks_hint_done">已结算 ¥%1$.2f</string>
+    <string name="tasks_submit_review">提交审核</string>
+    <string name="tasks_approve">通过审核</string>
+    <string name="tasks_settled">已入账</string>
+    <string name="tasks_tab_count">%1$s(%2$d)</string>
+
+    <string name="device_empty">暂无设备</string>
+    <string name="device_apply">去申领设备</string>
+    <string name="device_connect">已有设备，去连接</string>
+    <string name="device_more">更多</string>
+
+    <string name="wallet_balance_label">可提取余额（元）</string>
+    <string name="wallet_balance">¥%1$.2f</string>
+    <string name="wallet_detail">收益明细</string>
+    <string name="wallet_withdraw">去提现</string>
+    <string name="wallet_section">钱包明细</string>
+    <string name="wallet_empty">暂无收益</string>
+    <string name="wallet_entry_amount">+¥%1$.2f</string>
+
+    <string name="mine_verify">去认证</string>
+    <string name="mine_account">账户与安全</string>
+    <string name="mine_storage">存储空间</string>
+    <string name="mine_language">语言</string>
+    <string name="mine_language_value">简体中文</string>
+    <string name="mine_privacy">隐私政策</string>
+    <string name="mine_share_list">第三方共享清单</string>
+    <string name="mine_service">客服</string>
+    <string name="mine_about">关于我们</string>
+    <string name="mine_logout">退出登录</string>
+    <string name="mine_storage_computing">计算中…</string>
+    <string name="mine_avatar_fallback">帮</string>
+
+    <string name="demo_dev_toast">Demo 演示：功能开发中</string>
+</resources>

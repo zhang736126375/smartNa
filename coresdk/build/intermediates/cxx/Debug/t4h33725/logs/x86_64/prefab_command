@@ -1,0 +1,19 @@
+"/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java" \
+  --class-path \
+  /private/var/folders/cy/9qxpnz8n0xv_ht8c668hwbg40000gn/T/cursor-sandbox-cache/147231aa93a4ceb04e5e15e753e607c6/gradle/caches/modules-2/files-2.1/com.google.prefab/cli/2.0.0/f2702b5ca13df54e3ca92f29d6b403fb6285d8df/cli-2.0.0-all.jar \
+  com.google.prefab.cli.AppKt \
+  --build-system \
+  cmake \
+  --platform \
+  android \
+  --abi \
+  x86_64 \
+  --os-version \
+  24 \
+  --stl \
+  c++_shared \
+  --ndk-version \
+  25 \
+  --output \
+  /var/folders/cy/9qxpnz8n0xv_ht8c668hwbg40000gn/T/agp-prefab-staging2625070695294873712/staged-cli-output \
+  /Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/build/intermediates/cxx/refs/core/3b2v58r1

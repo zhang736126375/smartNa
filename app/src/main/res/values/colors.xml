@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="blue_primary">#2563EB</color>
+    <color name="blue_deep">#1D4ED8</color>
+    <color name="blue_light">#6EA8FF</color>
+    <color name="blue_gradient_start">#3B82F6</color>
+    <color name="blue_gradient_end">#93C5FD</color>
+    <color name="blue_text">#2563EB</color>
+
+    <color name="bg_gray">#F5F6F7</color>
+    <color name="section_gray">#F0F1F3</color>
+    <color name="input_gray">#F0F1F3</color>
+    <color name="card_white">#FFFFFF</color>
+    <color name="text_dark">#17181A</color>
+    <color name="text_gray">#9A9FA5</color>
+    <color name="divider_gray">#ECEDEF</color>
+    <color name="btn_disabled">#E8E9EB</color>
+    <color name="btn_disabled_text">#B0B4B8</color>
+
+    <color name="space_black">#050505</color>
+    <color name="star_white">#B3FFFFFF</color>
+    <color name="orbit_white">#33FFFFFF</color>
+
+    <color name="quota_black">#1A1B1D</color>
+    <color name="quota_number">#7DD3FC</color>
+    <color name="badge_red">#E5484D</color>
+    <color name="chevron_gray">#C9CDD2</color>
+    <color name="input_divider">#D8DBDE</color>
+    <color name="agree_border">#C9CDD1</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="white_28">#47FFFFFF</color>
+</resources>

@@ -1,0 +1,3 @@
+ninja: Entering directory `/Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/.cxx/Debug/a5j4y1p3/arm64-v8a'
+[1/2] Building CXX object CMakeFiles/coresdk.dir/jni/jni_crypto.cpp.o
+[2/2] Linking CXX shared library /Users/zhangmin/AndroidStudioProjects/smartNa/coresdk/build/intermediates/cxx/Debug/a5j4y1p3/obj/arm64-v8a/libcoresdk.so
