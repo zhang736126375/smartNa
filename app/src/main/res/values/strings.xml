@@ -28,14 +28,14 @@
     <string name="tab_mine">我的</string>
 
     <string name="hall_search_hint">输入场景/任务名称</string>
-    <string name="hall_filter_duration">时长</string>
-    <string name="hall_filter_sort">推荐排序</string>
-    <string name="hall_duration_all">全部时长</string>
-    <string name="hall_duration_le30">30分钟以内</string>
-    <string name="hall_duration_gt30">30分钟以上</string>
-    <string name="hall_sort_recommend">推荐排序</string>
-    <string name="hall_sort_quota">剩余名额最多</string>
-    <string name="hall_sort_reward">金额最高</string>
+    <string name="hall_back">返回</string>
+    <string name="hall_category_life">生活</string>
+    <string name="hall_category_factory">工厂</string>
+    <string name="hall_category_count">剩余 %1$d 个任务</string>
+    <string name="hall_filter_scene">场景</string>
+    <string name="hall_filter_device">设备</string>
+    <string name="hall_filter_all_scene">全部场景</string>
+    <string name="hall_filter_all_device">全部设备</string>
     <string name="hall_quota_suffix"> 剩余名额</string>
     <string name="hall_claim">领取</string>
     <string name="hall_claimed">已领取</string>

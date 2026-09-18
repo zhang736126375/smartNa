@@ -34,6 +34,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, CollectorViewModel>(), Ha
 
     override fun openHall() {
         binding.bottomNav.selectedItemId = R.id.nav_hall
+        (supportFragmentManager.findFragmentByTag(TAG_HALL) as? HallFragment)?.resetToHome()
     }
 
     private fun showTab(itemId: Int) {

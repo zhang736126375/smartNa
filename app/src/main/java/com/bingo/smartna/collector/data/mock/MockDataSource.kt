@@ -10,6 +10,7 @@ object MockDataSource {
             id = "t1",
             title = "MEgo丨View 头摄+Gripper夹爪",
             scene = "居住类-住宅",
+            device = "MEgo",
             settle = "按有效采集时长结算",
             duration = "2-60分钟",
             quotaTotal = 19,
@@ -19,6 +20,7 @@ object MockDataSource {
             id = "t2",
             title = "MEgo丨View 头摄+腕摄",
             scene = "居住类-住宅",
+            device = "MEgo",
             settle = "按有效采集时长结算",
             duration = "2-60分钟",
             quotaTotal = 20,
@@ -28,6 +30,7 @@ object MockDataSource {
             id = "t3",
             title = "MEgo丨Gripper 夹爪",
             scene = "居住类-住宅",
+            device = "MEgo",
             settle = "按有效采集时长结算",
             duration = "2-60分钟",
             quotaTotal = 20,
@@ -37,6 +40,7 @@ object MockDataSource {
             id = "t4",
             title = "MEgo丨View 头摄",
             scene = "居住类-住宅",
+            device = "MEgo",
             settle = "按有效采集时长结算",
             duration = "2-60分钟",
             quotaTotal = 18,
@@ -46,6 +50,7 @@ object MockDataSource {
             id = "t5",
             title = "洗碗质检 9.17",
             scene = "生产类-工厂车间",
+            device = "MEgo",
             settle = "按有效采集时长结算",
             duration = "2-60分钟",
             quotaTotal = 195,
@@ -55,10 +60,31 @@ object MockDataSource {
             id = "t6",
             title = "住宅丨宠物喂养_9.17",
             scene = "居住类-住宅",
+            device = "MEgo",
             settle = "按有效采集时长结算",
             duration = "2-60分钟",
             quotaTotal = 198,
             reward = 7.50
+        ),
+        Task(
+            id = "t7",
+            title = "UMI丨室内整理收纳",
+            scene = "居住类-公寓",
+            device = "UMI",
+            settle = "按有效采集时长结算",
+            duration = "2-60分钟",
+            quotaTotal = 42,
+            reward = 9.20
+        ),
+        Task(
+            id = "t8",
+            title = "UMI丨产线质检巡检",
+            scene = "生产类-工厂车间",
+            device = "UMI",
+            settle = "按有效采集时长结算",
+            duration = "2-60分钟",
+            quotaTotal = 36,
+            reward = 9.80
         )
     )
 }
