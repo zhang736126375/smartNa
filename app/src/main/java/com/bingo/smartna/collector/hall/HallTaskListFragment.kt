@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +12,7 @@ import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseFragment
 import com.bingo.smartna.collector.CollectorUiState
 import com.bingo.smartna.collector.CollectorViewModel
+import com.bingo.smartna.collector.capture.CaptureActivity
 import com.bingo.smartna.collector.data.model.HallCategory
 import com.bingo.smartna.collector.data.model.Task
 import com.bingo.smartna.collector.data.model.TaskKind
@@ -26,9 +26,7 @@ class HallTaskListFragment : BaseFragment<FragmentHallTaskListBinding, Collector
 
     private val adapter = TaskAdapter(
         onClaim = { viewModel.claim(it) },
-        onCapture = {
-            Toast.makeText(requireContext(), R.string.hall_capture_toast, Toast.LENGTH_SHORT).show()
-        }
+        onCapture = { CaptureActivity.start(requireContext(), it) }
     )
     private lateinit var category: HallCategory
     private var sceneFilter: String? = null

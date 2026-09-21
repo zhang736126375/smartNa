@@ -12,7 +12,8 @@ import com.bingo.smartna.databinding.ItemTaskCrowdBinding
 import com.blankj.utilcode.util.ClickUtils
 
 class CrowdTaskAdapter(
-    private val onClaim: (Task) -> Unit
+    private val onClaim: (Task) -> Unit,
+    private val onCapture: (Task) -> Unit
 ) : ListAdapter<HallTaskItem, CrowdTaskAdapter.Holder>(Diff) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
@@ -21,11 +22,11 @@ class CrowdTaskAdapter(
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder.bind(getItem(position), onClaim)
+        holder.bind(getItem(position), onClaim, onCapture)
     }
 
     class Holder(private val binding: ItemTaskCrowdBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: HallTaskItem, onClaim: (Task) -> Unit) {
+        fun bind(item: HallTaskItem, onClaim: (Task) -> Unit, onCapture: (Task) -> Unit) {
             val context = binding.root.context
             binding.tvTitle.text = item.task.title
             binding.tvScene.text = item.task.scene
@@ -33,24 +34,28 @@ class CrowdTaskAdapter(
             binding.tvDuration.text = item.task.duration
             binding.tvQuota.text = item.quotaLeft.toString()
 
-            val disabled = item.claimed || item.quotaLeft <= 0
+            val full = !item.claimed && item.quotaLeft <= 0
             binding.btnClaim.text = when {
-                item.claimed -> context.getString(R.string.hall_claimed)
-                item.quotaLeft <= 0 -> context.getString(R.string.hall_full)
+                item.claimed -> context.getString(R.string.hall_enter)
+                full -> context.getString(R.string.hall_full)
                 else -> context.getString(R.string.hall_claim_short)
             }
             binding.btnClaim.setBackgroundResource(
-                if (disabled) R.drawable.bg_btn_disabled else R.drawable.bg_btn_primary
+                if (full) R.drawable.bg_btn_disabled else R.drawable.bg_btn_primary
             )
             binding.btnClaim.setTextColor(
                 ContextCompat.getColor(
                     context,
-                    if (disabled) R.color.btn_disabled_text else R.color.card_white
+                    if (full) R.color.btn_disabled_text else R.color.card_white
                 )
             )
-            binding.btnClaim.isEnabled = !disabled
+            binding.btnClaim.isEnabled = !full
             ClickUtils.applySingleDebouncing(binding.btnClaim) {
-                if (!disabled) onClaim(item.task)
+                when {
+                    full -> Unit
+                    item.claimed -> onCapture(item.task)
+                    else -> onClaim(item.task)
+                }
             }
         }
     }

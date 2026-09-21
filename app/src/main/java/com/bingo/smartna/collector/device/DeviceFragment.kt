@@ -35,6 +35,9 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
         ClickUtils.applySingleDebouncing(binding.btnConnect) {
             connectLauncher.launch(Intent(requireContext(), ConnectKitActivity::class.java))
         }
+        ClickUtils.applySingleDebouncing(binding.btnEgoDemo) {
+            startActivity(Intent(requireContext(), EgoUsbDemoActivity::class.java))
+        }
         ClickUtils.applySingleDebouncing(binding.btnDisconnect) {
             Prefs(requireContext()).clearConnectedDevice()
             renderState()

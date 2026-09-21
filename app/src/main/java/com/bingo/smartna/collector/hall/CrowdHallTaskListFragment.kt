@@ -14,6 +14,7 @@ import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseFragment
 import com.bingo.smartna.collector.CollectorUiState
 import com.bingo.smartna.collector.CollectorViewModel
+import com.bingo.smartna.collector.capture.CaptureActivity
 import com.bingo.smartna.collector.data.model.HallCategory
 import com.bingo.smartna.collector.data.model.Task
 import com.bingo.smartna.collector.data.model.UserRole
@@ -22,7 +23,10 @@ import com.blankj.utilcode.util.ClickUtils
 
 class CrowdHallTaskListFragment : BaseFragment<FragmentHallTaskListCrowdBinding, CollectorViewModel>() {
 
-    private val adapter = CrowdTaskAdapter { viewModel.claim(it) }
+    private val adapter = CrowdTaskAdapter(
+        onClaim = { viewModel.claim(it) },
+        onCapture = { CaptureActivity.start(requireContext(), it) }
+    )
     private lateinit var category: HallCategory
     private var sceneFilter: String? = null
     private var deviceFilter: String? = null

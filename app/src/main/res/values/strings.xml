@@ -111,6 +111,21 @@
     <string name="device_camera_denied">需要相机权限才能扫描设备二维码</string>
     <string name="device_connected">已连接</string>
     <string name="device_disconnect">断开连接</string>
+    <string name="device_ego_demo">Ego SDK Demo</string>
+
+    <string name="capture_title">采集</string>
+    <string name="capture_hint">手机预览底稿，点开始录制短视频到 App 目录</string>
+    <string name="capture_start">开始录制</string>
+    <string name="capture_stop">停止录制</string>
+    <string name="capture_recording">录制中…</string>
+    <string name="capture_saved">已保存 %1$s</string>
+    <string name="capture_failed">录制失败：%1$d</string>
+    <string name="capture_camera_denied">需要相机权限才能采集</string>
+
+    <string name="ego_demo_title">Ego SDK Demo</string>
+    <string name="ego_demo_hint">插入 Ego USB，授权后在本页和 Logcat 查看 DeviceInfo 与左彩色帧序号</string>
+    <string name="ego_demo_waiting">等待设备接入…</string>
+    <string name="ego_demo_stop">停止并返回</string>
 
     <string name="wallet_balance_label">可提取余额（元）</string>
     <string name="wallet_balance">¥%1$.2f</string>
