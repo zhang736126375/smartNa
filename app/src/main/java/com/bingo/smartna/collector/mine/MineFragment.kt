@@ -4,12 +4,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseFragment
+import com.bingo.smartna.collector.CollectorUiState
 import com.bingo.smartna.collector.CollectorViewModel
+import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.collector.login.LoginActivity
+import com.bingo.smartna.collector.login.LoginViewModel
+import com.bingo.smartna.databinding.DialogApplyUpgradeBinding
 import com.bingo.smartna.databinding.FragmentMineBinding
 import com.bingo.smartna.databinding.ItemSettingRowBinding
 import com.blankj.utilcode.util.ActivityUtils
@@ -38,12 +44,40 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
         }
         ClickUtils.applySingleDebouncing(binding.btnVerify) { showDevToast() }
         ClickUtils.applySingleDebouncing(binding.btnLogout) { viewModel.logout() }
+        ClickUtils.applySingleDebouncing(binding.btnApplyStaff) {
+            showApplyDialog(
+                titleRes = R.string.mine_apply_staff_title,
+                hintRes = R.string.mine_apply_staff_hint,
+                preset = LoginViewModel.ACCOUNT_STAFF
+            ) { viewModel.upgradeTo(UserRole.STAFF, it) }
+        }
+        ClickUtils.applySingleDebouncing(binding.btnApplyLead) {
+            showApplyDialog(
+                titleRes = R.string.mine_apply_lead_title,
+                hintRes = R.string.mine_apply_lead_hint,
+                preset = LoginViewModel.ACCOUNT_LEAD
+            ) { viewModel.upgradeTo(UserRole.LEAD, it) }
+        }
     }
 
     override fun initViewObservable() {
         viewModel.ui.observe(viewLifecycleOwner) { state ->
-            binding.tvPhone.text = state.maskedPhone
+            binding.tvPhone.text = state.profileTitle
             binding.tvAvatar.text = state.avatarLetter.ifBlank { getString(R.string.mine_avatar_fallback) }
+            renderRole(state)
+        }
+        viewModel.upgraded.observe(viewLifecycleOwner) { target ->
+            if (target == null) return@observe
+            viewModel.consumeUpgrade()
+            val message = if (target == UserRole.LEAD) {
+                R.string.mine_upgrade_lead_success
+            } else {
+                R.string.mine_upgrade_staff_success
+            }
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            val intent = android.content.Intent(requireContext(), com.bingo.smartna.MainActivity::class.java)
+            requireActivity().finish()
+            startActivity(intent)
         }
         viewModel.loggedOut.observe(viewLifecycleOwner) { loggedOut ->
             if (loggedOut == true) {
@@ -51,6 +85,49 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
                 requireActivity().finish()
             }
         }
+    }
+
+    private fun renderRole(state: CollectorUiState) {
+        val roleRes = when (state.role) {
+            UserRole.CROWD -> R.string.mine_role_crowd
+            UserRole.STAFF -> R.string.mine_role_staff
+            UserRole.LEAD -> R.string.mine_role_lead
+        }
+        binding.tvRole.setText(roleRes)
+        val showVerify = state.role != UserRole.LEAD
+        binding.verifyWrap.visibility = if (showVerify) View.VISIBLE else View.GONE
+        binding.upgradePanel.visibility = if (state.role == UserRole.CROWD) View.VISIBLE else View.GONE
+        binding.btnApplyStaff.isEnabled = true
+        binding.btnApplyLead.isEnabled = true
+        binding.btnApplyStaff.setText(R.string.mine_apply_staff)
+        binding.btnApplyLead.setText(R.string.mine_apply_lead)
+        binding.btnApplyStaff.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_dark))
+        binding.btnApplyLead.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_dark))
+    }
+
+    private fun showApplyDialog(
+        titleRes: Int,
+        hintRes: Int,
+        preset: String,
+        onSubmit: (String) -> Unit
+    ) {
+        val dialogBinding = DialogApplyUpgradeBinding.inflate(layoutInflater)
+        dialogBinding.etArea.setHint(hintRes)
+        dialogBinding.etArea.setText(preset)
+        dialogBinding.etArea.setSelection(dialogBinding.etArea.text?.length ?: 0)
+        AlertDialog.Builder(requireContext())
+            .setTitle(titleRes)
+            .setView(dialogBinding.root)
+            .setPositiveButton(R.string.mine_apply_submit) { _, _ ->
+                val area = dialogBinding.etArea.text?.toString()?.trim().orEmpty()
+                if (area.isBlank()) {
+                    Toast.makeText(requireContext(), R.string.mine_apply_area_empty, Toast.LENGTH_SHORT).show()
+                } else {
+                    onSubmit(area)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun bindSettings(storageText: String) {

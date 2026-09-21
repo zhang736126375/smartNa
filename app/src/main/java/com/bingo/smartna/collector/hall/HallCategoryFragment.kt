@@ -29,13 +29,19 @@ class HallCategoryFragment : BaseFragment<FragmentHallCategoryBinding, Collector
 
     override fun initViewObservable() {
         viewModel.ui.observe(viewLifecycleOwner) { state ->
-            val items = HallCategory.entries.map { category ->
+            val role = state.role
+            val items = HallCategory.homeEntries(role).map { category ->
                 val remain = viewModel.hallTasks.count { task ->
                     category.matches(task) &&
                         task.id !in state.claimedIds &&
                         (state.quotaLeft[task.id] ?: 0) > 0
                 }
-                HallCategoryItem(category, remain)
+                HallCategoryItem(
+                    category = category,
+                    remainCount = remain,
+                    titleRes = category.titleResFor(role),
+                    bgRes = category.bgResFor(role)
+                )
             }
             adapter.submitList(items)
         }

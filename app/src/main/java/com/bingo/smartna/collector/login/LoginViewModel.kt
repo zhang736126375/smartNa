@@ -5,7 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.bingo.smartna.base.ui.BaseViewModel
 import com.bingo.smartna.collector.data.Prefs
+import com.bingo.smartna.collector.data.model.UserRole
 import kotlinx.coroutines.delay
+
+sealed class AccountLoginResult {
+    data class Success(val role: UserRole) : AccountLoginResult()
+    object AccountNotFound : AccountLoginResult()
+    object PasswordTooShort : AccountLoginResult()
+}
 
 class LoginViewModel(application: Application) : BaseViewModel(application) {
 
@@ -29,7 +36,23 @@ class LoginViewModel(application: Application) : BaseViewModel(application) {
         return true
     }
 
-    fun login(phone: String) {
-        prefs.saveLogin(phone)
+    fun loginByPhone(phone: String) {
+        prefs.savePhoneLogin(phone)
+    }
+
+    fun loginByAccount(username: String, password: String): AccountLoginResult {
+        if (password.length < 4) return AccountLoginResult.PasswordTooShort
+        val role = when (username.trim()) {
+            ACCOUNT_STAFF -> UserRole.STAFF
+            ACCOUNT_LEAD -> UserRole.LEAD
+            else -> return AccountLoginResult.AccountNotFound
+        }
+        prefs.saveAccountLogin(username.trim(), role)
+        return AccountLoginResult.Success(role)
+    }
+
+    companion object {
+        const val ACCOUNT_STAFF = "石家庄1区28号"
+        const val ACCOUNT_LEAD = "石家庄1区"
     }
 }

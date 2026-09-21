@@ -3,11 +3,10 @@ package com.bingo.smartna.collector.hall
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bingo.smartna.R
@@ -16,15 +15,25 @@ import com.bingo.smartna.collector.CollectorUiState
 import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.data.model.HallCategory
 import com.bingo.smartna.collector.data.model.Task
+import com.bingo.smartna.collector.data.model.TaskKind
+import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.databinding.FragmentHallTaskListBinding
 import com.blankj.utilcode.util.ClickUtils
 
+enum class HallKindFilter { ALL, CUSTOM, FREE }
+
 class HallTaskListFragment : BaseFragment<FragmentHallTaskListBinding, CollectorViewModel>() {
 
-    private val adapter = TaskAdapter { viewModel.claim(it) }
+    private val adapter = TaskAdapter(
+        onClaim = { viewModel.claim(it) },
+        onCapture = {
+            Toast.makeText(requireContext(), R.string.hall_capture_toast, Toast.LENGTH_SHORT).show()
+        }
+    )
     private lateinit var category: HallCategory
     private var sceneFilter: String? = null
     private var deviceFilter: String? = null
+    private var kindFilter = HallKindFilter.ALL
     private var latestState: CollectorUiState? = null
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?) =
@@ -39,20 +48,16 @@ class HallTaskListFragment : BaseFragment<FragmentHallTaskListBinding, Collector
     }
 
     override fun initData() {
-        binding.tvTitle.setText(
-            when (category) {
-                HallCategory.LIFE -> R.string.hall_category_life
-                HallCategory.FACTORY -> R.string.hall_category_factory
-            }
-        )
+        binding.tvTitle.setText(category.titleResFor(viewModel.ui.value?.role ?: UserRole.STAFF))
         binding.rvTasks.layoutManager = LinearLayoutManager(requireContext())
         binding.rvTasks.adapter = adapter
-        binding.etSearch.doAfterTextChanged { renderList() }
         ClickUtils.applySingleDebouncing(binding.btnBack) {
             (parentFragment as? HallCategoryNavigator)?.closeCategory()
         }
-        binding.filterScene.setOnClickListener { showSceneMenu() }
-        binding.filterDevice.setOnClickListener { showDeviceMenu() }
+        ClickUtils.applySingleDebouncing(binding.btnFilter) { showFilterMenu() }
+        binding.chipAll.setOnClickListener { kindFilter = HallKindFilter.ALL; renderList() }
+        binding.chipCustom.setOnClickListener { kindFilter = HallKindFilter.CUSTOM; renderList() }
+        binding.chipFree.setOnClickListener { kindFilter = HallKindFilter.FREE; renderList() }
     }
 
     override fun initViewObservable() {
@@ -66,9 +71,28 @@ class HallTaskListFragment : BaseFragment<FragmentHallTaskListBinding, Collector
 
     private fun renderList() {
         val state = latestState ?: return
-        val query = binding.etSearch.text?.toString().orEmpty()
-        val visible = categoryTasks()
-            .filter { matchesSearch(it, query) }
+        val all = categoryTasks()
+        binding.chipAll.text = getString(R.string.hall_chip_all, all.size)
+        binding.chipCustom.text = getString(
+            R.string.hall_chip_custom,
+            all.count { it.kind == TaskKind.CUSTOM }
+        )
+        binding.chipFree.text = getString(
+            R.string.hall_chip_free,
+            all.count { it.kind == TaskKind.FREE }
+        )
+        bindChip(binding.chipAll, kindFilter == HallKindFilter.ALL)
+        bindChip(binding.chipCustom, kindFilter == HallKindFilter.CUSTOM)
+        bindChip(binding.chipFree, kindFilter == HallKindFilter.FREE)
+
+        val visible = all
+            .filter {
+                when (kindFilter) {
+                    HallKindFilter.ALL -> true
+                    HallKindFilter.CUSTOM -> it.kind == TaskKind.CUSTOM
+                    HallKindFilter.FREE -> it.kind == TaskKind.FREE
+                }
+            }
             .filter { sceneFilter == null || it.scene == sceneFilter }
             .filter { deviceFilter == null || it.device == deviceFilter }
             .sortedByDescending { it.reward }
@@ -82,81 +106,47 @@ class HallTaskListFragment : BaseFragment<FragmentHallTaskListBinding, Collector
         adapter.submitList(visible)
     }
 
-    private fun showSceneMenu() {
-        val options = listOf(getString(R.string.hall_filter_all_scene)) +
-            categoryTasks().map { it.scene }.distinct()
-        val selected = sceneFilter?.let { options.indexOf(it) }?.takeIf { it >= 0 } ?: 0
-        showFilter(binding.tvScene, options, selected) { index ->
-            sceneFilter = if (index == 0) null else options[index]
-            updateFilterLabel(
-                binding.tvScene,
-                binding.ivScene,
-                sceneFilter,
-                R.string.hall_filter_scene
-            )
-            renderList()
-        }
-    }
-
-    private fun showDeviceMenu() {
-        val options = listOf(getString(R.string.hall_filter_all_device)) +
-            categoryTasks().map { it.device }.distinct()
-        val selected = deviceFilter?.let { options.indexOf(it) }?.takeIf { it >= 0 } ?: 0
-        showFilter(binding.tvDevice, options, selected) { index ->
-            deviceFilter = if (index == 0) null else options[index]
-            updateFilterLabel(
-                binding.tvDevice,
-                binding.ivDevice,
-                deviceFilter,
-                R.string.hall_filter_device
-            )
-            renderList()
-        }
-    }
-
-    private fun updateFilterLabel(
-        label: TextView,
-        arrow: ImageView,
-        selected: String?,
-        defaultRes: Int
-    ) {
-        val isDefault = selected == null
-        label.text = selected ?: getString(defaultRes)
-        val color = ContextCompat.getColor(
-            requireContext(),
-            if (isDefault) R.color.text_gray else R.color.blue_primary
+    private fun bindChip(chip: TextView, selected: Boolean) {
+        chip.setBackgroundResource(if (selected) R.drawable.bg_chip_selected else R.drawable.bg_chip_normal)
+        chip.setTextColor(
+            ContextCompat.getColor(requireContext(), if (selected) R.color.card_white else R.color.text_dark)
         )
-        label.setTextColor(color)
-        arrow.setColorFilter(color)
+        chip.paint.isFakeBoldText = selected
     }
 
-    private fun showFilter(
-        anchor: android.view.View,
-        options: List<String>,
-        selected: Int,
-        onSelect: (Int) -> Unit
-    ) {
-        PopupMenu(requireContext(), anchor).apply {
-            options.forEachIndexed { index, title -> menu.add(0, index, index, title) }
-            menu.getItem(selected)?.isChecked = true
-            setOnMenuItemClickListener {
-                onSelect(it.itemId)
+    private fun showFilterMenu() {
+        val scenes = listOf(getString(R.string.hall_filter_all_scene)) +
+            categoryTasks().map { it.scene }.distinct()
+        val devices = listOf(getString(R.string.hall_filter_all_device)) +
+            categoryTasks().map { it.device }.distinct()
+        PopupMenu(requireContext(), binding.btnFilter).apply {
+            scenes.forEachIndexed { index, title ->
+                menu.add(GROUP_SCENE, index, index, getString(R.string.hall_filter_scene_item, title))
+            }
+            devices.forEachIndexed { index, title ->
+                menu.add(
+                    GROUP_DEVICE,
+                    index,
+                    scenes.size + index,
+                    getString(R.string.hall_filter_device_item, title)
+                )
+            }
+            setOnMenuItemClickListener { item ->
+                when (item.groupId) {
+                    GROUP_SCENE -> sceneFilter = if (item.itemId == 0) null else scenes[item.itemId]
+                    GROUP_DEVICE -> deviceFilter = if (item.itemId == 0) null else devices[item.itemId]
+                }
+                renderList()
                 true
             }
             show()
         }
     }
 
-    private fun matchesSearch(task: Task, query: String): Boolean {
-        if (query.isBlank()) return true
-        val q = query.trim()
-        return task.title.contains(q, ignoreCase = true) ||
-            task.scene.contains(q, ignoreCase = true) ||
-            task.device.contains(q, ignoreCase = true)
-    }
-
     companion object {
         private const val ARG_CATEGORY = "category_id"
+        private const val GROUP_SCENE = 1
+        private const val GROUP_DEVICE = 2
 
         fun newInstance(categoryId: String) = HallTaskListFragment().apply {
             arguments = Bundle().apply { putString(ARG_CATEGORY, categoryId) }

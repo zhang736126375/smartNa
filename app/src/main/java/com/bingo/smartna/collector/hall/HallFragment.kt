@@ -8,6 +8,7 @@ import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseFragment
 import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.data.model.HallCategory
+import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.databinding.FragmentHallBinding
 
 class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), HallCategoryNavigator {
@@ -53,8 +54,13 @@ class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), Ha
     }
 
     override fun openCategory(category: HallCategory) {
+        val list = if (viewModel.ui.value?.role == UserRole.CROWD) {
+            CrowdHallTaskListFragment.newInstance(category.id)
+        } else {
+            HallTaskListFragment.newInstance(category.id)
+        }
         childFragmentManager.beginTransaction()
-            .replace(R.id.hallContainer, HallTaskListFragment.newInstance(category.id))
+            .replace(R.id.hallContainer, list)
             .addToBackStack(TAG_LIST)
             .commit()
     }

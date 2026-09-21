@@ -2,6 +2,8 @@
 <resources>
     <color name="blue_primary">#2563EB</color>
     <color name="blue_deep">#1D4ED8</color>
+    <color name="staff_primary">#1E3A8A</color>
+    <color name="staff_primary_dark">#172554</color>
     <color name="blue_light">#6EA8FF</color>
     <color name="blue_gradient_start">#3B82F6</color>
     <color name="blue_gradient_end">#93C5FD</color>
@@ -24,6 +26,13 @@
     <color name="quota_black">#1A1B1D</color>
     <color name="quota_number">#7DD3FC</color>
     <color name="badge_red">#E5484D</color>
+    <color name="priority_high">#E5484D</color>
+    <color name="priority_doing">#2563EB</color>
+    <color name="priority_unlimited">#6B7280</color>
+    <color name="kind_tag_bg">#EEF3FF</color>
+    <color name="kind_tag_text">#2563EB</color>
+    <color name="chip_bg">#F0F1F3</color>
+    <color name="progress_track">#E8E9EB</color>
     <color name="chevron_gray">#C9CDD2</color>
     <color name="input_divider">#D8DBDE</color>
     <color name="agree_border">#C9CDD1</color>

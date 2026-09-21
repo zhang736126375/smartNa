@@ -8,26 +8,41 @@ import com.bingo.smartna.collector.data.Prefs
 import com.bingo.smartna.collector.data.mock.MockDataSource
 import com.bingo.smartna.collector.data.model.Task
 import com.bingo.smartna.collector.data.model.TaskStatus
+import com.bingo.smartna.collector.data.model.TeamTaskRow
+import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.collector.data.model.UserTask
 import com.bingo.smartna.collector.data.model.WalletEntry
 
 data class CollectorUiState(
     val phone: String = "",
+    val displayName: String = "",
+    val role: UserRole = UserRole.CROWD,
+    val staffUpgradePending: Boolean = false,
+    val leadUpgradePending: Boolean = false,
     val quotaLeft: Map<String, Int> = emptyMap(),
     val claimedIds: Set<String> = emptySet(),
     val userTasks: List<UserTask> = emptyList(),
     val walletBalance: Double = 0.0,
     val walletEntries: List<WalletEntry> = emptyList()
 ) {
-    val maskedPhone: String
-        get() = if (phone.length == 11) {
-            phone.take(3) + "****" + phone.takeLast(4)
-        } else {
-            phone
+    val profileTitle: String
+        get() = when {
+            displayName.isNotBlank() && displayName != phone -> displayName
+            phone.length == 11 -> phone.take(3) + "****" + phone.takeLast(4)
+            displayName.isNotBlank() -> displayName
+            else -> phone
         }
 
     val avatarLetter: String
-        get() = phone.takeLast(4).firstOrNull()?.toString() ?: ""
+        get() = when {
+            displayName.isNotBlank() && displayName != phone -> displayName.first().toString()
+            phone.isNotBlank() -> phone.takeLast(4).firstOrNull()?.toString().orEmpty()
+            displayName.isNotBlank() -> displayName.first().toString()
+            else -> ""
+        }
+
+    val maskedPhone: String
+        get() = profileTitle
 
     fun inProgressCount() = userTasks.count { it.status == TaskStatus.IN_PROGRESS }
     fun reviewingCount() = userTasks.count { it.status == TaskStatus.REVIEWING }
@@ -42,6 +57,7 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
 
     private val prefs = Prefs(application)
     val hallTasks: List<Task> = MockDataSource.tasks
+    val teamTasks: List<TeamTaskRow> = MockDataSource.teamTasks
 
     private val quotaLeft = MockDataSource.tasks.associate { it.id to it.quotaTotal }.toMutableMap()
     private val claimedIds = linkedSetOf<String>()
@@ -49,12 +65,19 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
     private val walletEntries = mutableListOf<WalletEntry>()
     private var walletBalance = 0.0
     private var phone = prefs.phone.orEmpty()
+    private var displayName = prefs.displayName
+    private var role = prefs.role
+    private var staffUpgradePending = prefs.staffUpgradePending
+    private var leadUpgradePending = prefs.leadUpgradePending
 
     private val _ui = MutableLiveData(buildState())
     val ui: LiveData<CollectorUiState> = _ui
 
     private val _loggedOut = MutableLiveData<Boolean>()
     val loggedOut: LiveData<Boolean> = _loggedOut
+
+    private val _upgraded = MutableLiveData<UserRole?>()
+    val upgraded: LiveData<UserRole?> = _upgraded
 
     fun claim(task: Task) {
         if (claimedIds.contains(task.id)) return
@@ -64,6 +87,33 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
         claimedIds.add(task.id)
         userTasks.add(UserTask(task, TaskStatus.IN_PROGRESS, System.currentTimeMillis()))
         emit()
+    }
+
+    fun upgradeTo(target: UserRole, area: String) {
+        if (role != UserRole.CROWD) return
+        if (target != UserRole.STAFF && target != UserRole.LEAD) return
+        launch(showLoading = true) {
+            kotlinx.coroutines.delay(1000)
+            prefs.upgradeTo(target, area)
+            role = target
+            displayName = area
+            staffUpgradePending = false
+            leadUpgradePending = false
+            emit()
+            _upgraded.value = target
+        }
+    }
+
+    fun consumeUpgrade() {
+        _upgraded.value = null
+    }
+
+    fun applyStaffUpgrade(area: String) {
+        upgradeTo(UserRole.STAFF, area)
+    }
+
+    fun applyLeadUpgrade(area: String) {
+        upgradeTo(UserRole.LEAD, area)
     }
 
     fun submitForReview(userTask: UserTask) {
@@ -90,6 +140,10 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
     fun logout() {
         prefs.clearLogin()
         phone = ""
+        displayName = ""
+        role = UserRole.CROWD
+        staffUpgradePending = false
+        leadUpgradePending = false
         userTasks.clear()
         claimedIds.clear()
         walletEntries.clear()
@@ -112,6 +166,10 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
 
     private fun buildState() = CollectorUiState(
         phone = phone,
+        displayName = displayName,
+        role = role,
+        staffUpgradePending = staffUpgradePending,
+        leadUpgradePending = leadUpgradePending,
         quotaLeft = quotaLeft.toMap(),
         claimedIds = claimedIds.toSet(),
         userTasks = userTasks.toList(),

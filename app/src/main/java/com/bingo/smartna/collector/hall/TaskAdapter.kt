@@ -1,6 +1,7 @@
 package com.bingo.smartna.collector.hall
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -8,6 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bingo.smartna.R
 import com.bingo.smartna.collector.data.model.Task
+import com.bingo.smartna.collector.data.model.TaskPriority
 import com.bingo.smartna.databinding.ItemTaskBinding
 import com.blankj.utilcode.util.ClickUtils
 
@@ -18,7 +20,8 @@ data class HallTaskItem(
 )
 
 class TaskAdapter(
-    private val onClaim: (Task) -> Unit
+    private val onClaim: (Task) -> Unit,
+    private val onCapture: (Task) -> Unit
 ) : ListAdapter<HallTaskItem, TaskAdapter.Holder>(Diff) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
@@ -27,36 +30,78 @@ class TaskAdapter(
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder.bind(getItem(position), onClaim)
+        holder.bind(getItem(position), onClaim, onCapture)
     }
 
     class Holder(private val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: HallTaskItem, onClaim: (Task) -> Unit) {
+        fun bind(item: HallTaskItem, onClaim: (Task) -> Unit, onCapture: (Task) -> Unit) {
             val context = binding.root.context
-            binding.tvTitle.text = item.task.title
-            binding.tvScene.text = item.task.scene
-            binding.tvSettle.text = item.task.settle
-            binding.tvDuration.text = item.task.duration
-            binding.tvQuota.text = item.quotaLeft.toString()
+            val task = item.task
+            binding.tvKind.text = task.kind.label
+            binding.tvPriority.text = task.priority.label
+            binding.tvPriority.setBackgroundResource(
+                when (task.priority) {
+                    TaskPriority.HIGH -> R.drawable.bg_priority_high
+                    TaskPriority.IN_PROGRESS -> R.drawable.bg_priority_doing
+                    TaskPriority.UNLIMITED -> R.drawable.bg_priority_unlimited
+                }
+            )
+            binding.tvPriority.setTextColor(
+                ContextCompat.getColor(
+                    context,
+                    when (task.priority) {
+                        TaskPriority.HIGH -> R.color.priority_high
+                        TaskPriority.IN_PROGRESS -> R.color.priority_doing
+                        TaskPriority.UNLIMITED -> R.color.priority_unlimited
+                    }
+                )
+            )
+            binding.tvTitle.text = task.title
+            val unlimited = task.priority == TaskPriority.UNLIMITED || task.targetClips <= 0
+            binding.tvMeta.text = if (unlimited) {
+                context.getString(R.string.hall_meta_unlimited, task.reward, task.deadline)
+            } else {
+                context.getString(R.string.hall_meta, task.targetClips, task.reward, task.deadline)
+            }
+            if (unlimited) {
+                binding.progressClips.visibility = View.GONE
+                binding.tvProgress.text = context.getString(R.string.hall_progress_unlimited, task.doneClips)
+            } else {
+                binding.progressClips.visibility = View.VISIBLE
+                val percent = (task.doneClips * 100 / task.targetClips).coerceIn(0, 100)
+                binding.progressClips.progress = percent
+                binding.tvProgress.text = context.getString(
+                    R.string.hall_progress,
+                    task.doneClips,
+                    task.targetClips
+                )
+            }
 
-            val disabled = item.claimed || item.quotaLeft <= 0
+            val full = !item.claimed && item.quotaLeft <= 0
+            val continueCapture = item.claimed && task.doneClips > 0 && !unlimited &&
+                task.doneClips < task.targetClips
             binding.btnClaim.text = when {
-                item.claimed -> context.getString(R.string.hall_claimed)
-                item.quotaLeft <= 0 -> context.getString(R.string.hall_full)
+                full -> context.getString(R.string.hall_full)
+                continueCapture -> context.getString(R.string.hall_continue)
+                item.claimed -> context.getString(R.string.hall_enter)
                 else -> context.getString(R.string.hall_claim)
             }
             binding.btnClaim.setBackgroundResource(
-                if (disabled) R.drawable.bg_btn_disabled else R.drawable.bg_btn_primary
+                if (full) R.drawable.bg_btn_disabled else R.drawable.bg_btn_primary
             )
             binding.btnClaim.setTextColor(
                 ContextCompat.getColor(
                     context,
-                    if (disabled) R.color.btn_disabled_text else R.color.card_white
+                    if (full) R.color.btn_disabled_text else R.color.card_white
                 )
             )
-            binding.btnClaim.isEnabled = !disabled
+            binding.btnClaim.isEnabled = !full
             ClickUtils.applySingleDebouncing(binding.btnClaim) {
-                if (!disabled) onClaim(item.task)
+                when {
+                    full -> Unit
+                    item.claimed -> onCapture(task)
+                    else -> onClaim(task)
+                }
             }
         }
     }

@@ -15,6 +15,13 @@
         <item name="bottomNavigationStyle">@style/Widget.SmartNa.BottomNav</item>
     </style>
 
+    <style name="Theme.SmartNa.Staff" parent="Theme.SmartNa">
+        <item name="colorPrimary">@color/staff_primary</item>
+        <item name="colorPrimaryVariant">@color/staff_primary_dark</item>
+        <item name="colorSecondary">@color/staff_primary</item>
+        <item name="colorSecondaryVariant">@color/staff_primary_dark</item>
+    </style>
+
     <style name="Theme.SmartNa.Login" parent="Theme.SmartNa">
         <item name="android:statusBarColor">@color/space_black</item>
         <item name="android:windowLightStatusBar">false</item>

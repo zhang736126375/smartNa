@@ -12,7 +12,9 @@ import com.blankj.utilcode.util.ClickUtils
 
 data class HallCategoryItem(
     val category: HallCategory,
-    val remainCount: Int
+    val remainCount: Int,
+    val titleRes: Int,
+    val bgRes: Int
 )
 
 class HallCategoryAdapter(
@@ -31,19 +33,9 @@ class HallCategoryAdapter(
     class Holder(private val binding: ItemHallCategoryBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: HallCategoryItem, onClick: (HallCategory) -> Unit) {
             val context = binding.root.context
-            binding.tvName.setText(
-                when (item.category) {
-                    HallCategory.LIFE -> R.string.hall_category_life
-                    HallCategory.FACTORY -> R.string.hall_category_factory
-                }
-            )
+            binding.tvName.setText(item.titleRes)
             binding.tvCount.text = context.getString(R.string.hall_category_count, item.remainCount)
-            binding.root.setBackgroundResource(
-                when (item.category) {
-                    HallCategory.LIFE -> R.drawable.bg_hall_category_life
-                    HallCategory.FACTORY -> R.drawable.bg_hall_category_factory
-                }
-            )
+            binding.root.setBackgroundResource(item.bgRes)
             ClickUtils.applySingleDebouncing(binding.root) { onClick(item.category) }
         }
     }

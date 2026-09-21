@@ -91,7 +91,14 @@ class MyTasksFragment : BaseFragment<FragmentMyTasksBinding, CollectorViewModel>
     ) {
         titleView.text = if (count > 0) getString(R.string.tasks_tab_count, label, count) else label
         titleView.setTextColor(
-            ContextCompat.getColor(requireContext(), if (active) R.color.blue_primary else R.color.text_dark)
+            if (active) {
+                com.google.android.material.color.MaterialColors.getColor(
+                    titleView,
+                    com.google.android.material.R.attr.colorPrimary
+                )
+            } else {
+                ContextCompat.getColor(requireContext(), R.color.text_dark)
+            }
         )
         titleView.paint.isFakeBoldText = active
         indicator.visibility = if (active) View.VISIBLE else View.INVISIBLE
