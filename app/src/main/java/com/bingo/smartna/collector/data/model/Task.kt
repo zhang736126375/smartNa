@@ -1,5 +1,7 @@
 package com.bingo.smartna.collector.data.model
 
+import com.bingo.smartna.collector.DemoCaptureConfig
+
 import com.bingo.smartna.R
 
 /** 大厅六分类。 */
@@ -24,9 +26,7 @@ enum class HallCategory(val id: String, val titleRes: Int, val bgRes: Int) {
     companion object {
         fun fromId(id: String): HallCategory = entries.find { it.id == id } ?: LIFE
 
-        fun homeEntries(role: UserRole): List<HallCategory> {
-            return if (role == UserRole.CROWD) listOf(LIFE, PRODUCE) else entries
-        }
+        fun homeEntries(): List<HallCategory> = entries
     }
 }
 
@@ -69,8 +69,15 @@ data class Task(
     val targetClips: Int,
     val doneClips: Int,
     val deadline: String,
-    val priority: TaskPriority
-)
+    val priority: TaskPriority,
+    val durationMax: Int = 90
+) {
+    val sceneGroupName: String
+        get() = scene.substringBefore("-").ifBlank { scene }
+
+    val sceneChildName: String
+        get() = scene.substringAfter("-", "")
+}
 
 /** 用户领取后的任务状态：进行中 → 审核中 → 已完成 */
 enum class TaskStatus {
@@ -89,8 +96,24 @@ enum class TaskStatus {
 data class UserTask(
     val task: Task,
     val status: TaskStatus,
-    val claimedAt: Long
-)
+    val claimedAt: Long,
+    val doneClips: Int = 0,
+    val uploadedClips: Int = 0
+) {
+    fun effectiveTargetClips(): Int {
+        return if (task.targetClips > 0) task.targetClips else 1
+    }
+
+    fun demoTargetClips(): Int = effectiveTargetClips().coerceAtMost(DemoCaptureConfig.MAX_CLIPS)
+
+    fun canCaptureMore(): Boolean = doneClips < effectiveTargetClips()
+
+    fun canCaptureMoreDemo(): Boolean = doneClips < demoTargetClips()
+
+    fun canSubmitReview(): Boolean = uploadedClips >= effectiveTargetClips()
+
+    fun canSubmitReviewDemo(): Boolean = uploadedClips >= demoTargetClips()
+}
 
 data class WalletEntry(
     val title: String,

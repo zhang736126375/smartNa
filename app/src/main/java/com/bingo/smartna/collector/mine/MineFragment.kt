@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bingo.smartna.R
@@ -18,7 +17,6 @@ import com.bingo.smartna.collector.login.LoginViewModel
 import com.bingo.smartna.databinding.DialogApplyUpgradeBinding
 import com.bingo.smartna.databinding.FragmentMineBinding
 import com.bingo.smartna.databinding.ItemSettingRowBinding
-import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ClickUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,11 +26,13 @@ import java.util.Locale
 
 class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
 
+    private var upgradeExpanded = false
+
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?) =
         FragmentMineBinding.inflate(inflater, container, false)
 
     override fun initViewModel(): CollectorViewModel {
-        return ViewModelProvider(requireActivity())[CollectorViewModel::class.java]
+        return com.bingo.smartna.collector.CollectorViewModels.get(requireActivity().application)
     }
 
     override fun initData() {
@@ -44,9 +44,12 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
         }
         ClickUtils.applySingleDebouncing(binding.btnVerify) { showDevToast() }
         ClickUtils.applySingleDebouncing(binding.btnLogout) { viewModel.logout() }
+        ClickUtils.applySingleDebouncing(binding.upgradeHeader) { toggleUpgradeSection() }
+        updateUpgradeExpandedUi()
         ClickUtils.applySingleDebouncing(binding.btnApplyStaff) {
             showApplyDialog(
                 titleRes = R.string.mine_apply_staff_title,
+                descRes = R.string.mine_apply_staff_desc,
                 hintRes = R.string.mine_apply_staff_hint,
                 preset = LoginViewModel.ACCOUNT_STAFF
             ) { viewModel.upgradeTo(UserRole.STAFF, it) }
@@ -54,6 +57,7 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
         ClickUtils.applySingleDebouncing(binding.btnApplyLead) {
             showApplyDialog(
                 titleRes = R.string.mine_apply_lead_title,
+                descRes = R.string.mine_apply_lead_desc,
                 hintRes = R.string.mine_apply_lead_hint,
                 preset = LoginViewModel.ACCOUNT_LEAD
             ) { viewModel.upgradeTo(UserRole.LEAD, it) }
@@ -75,13 +79,18 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
                 R.string.mine_upgrade_staff_success
             }
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-            val intent = android.content.Intent(requireContext(), com.bingo.smartna.MainActivity::class.java)
+            startActivity(com.bingo.smartna.MainActivity.freshStart(requireContext()))
             requireActivity().finish()
-            startActivity(intent)
         }
         viewModel.loggedOut.observe(viewLifecycleOwner) { loggedOut ->
             if (loggedOut == true) {
-                ActivityUtils.startActivity(LoginActivity::class.java)
+                viewModel.consumeLoggedOut()
+                val intent = android.content.Intent(requireContext(), LoginActivity::class.java)
+                    .addFlags(
+                        android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                            android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    )
+                startActivity(intent)
                 requireActivity().finish()
             }
         }
@@ -96,38 +105,51 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
         binding.tvRole.setText(roleRes)
         val showVerify = state.role != UserRole.LEAD
         binding.verifyWrap.visibility = if (showVerify) View.VISIBLE else View.GONE
-        binding.upgradePanel.visibility = if (state.role == UserRole.CROWD) View.VISIBLE else View.GONE
-        binding.btnApplyStaff.isEnabled = true
-        binding.btnApplyLead.isEnabled = true
-        binding.btnApplyStaff.setText(R.string.mine_apply_staff)
-        binding.btnApplyLead.setText(R.string.mine_apply_lead)
-        binding.btnApplyStaff.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_dark))
-        binding.btnApplyLead.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_dark))
+        binding.upgradeSection.visibility = if (state.role == UserRole.CROWD) View.VISIBLE else View.GONE
+        if (state.role != UserRole.CROWD) {
+            upgradeExpanded = false
+            updateUpgradeExpandedUi()
+        }
+    }
+
+    private fun toggleUpgradeSection() {
+        upgradeExpanded = !upgradeExpanded
+        updateUpgradeExpandedUi()
+    }
+
+    private fun updateUpgradeExpandedUi() {
+        binding.upgradeContent.visibility = if (upgradeExpanded) View.VISIBLE else View.GONE
+        binding.ivUpgradeChevron.rotation = if (upgradeExpanded) 270f else 90f
     }
 
     private fun showApplyDialog(
         titleRes: Int,
+        descRes: Int,
         hintRes: Int,
         preset: String,
         onSubmit: (String) -> Unit
     ) {
         val dialogBinding = DialogApplyUpgradeBinding.inflate(layoutInflater)
+        dialogBinding.tvTitle.setText(titleRes)
+        dialogBinding.tvDesc.setText(descRes)
         dialogBinding.etArea.setHint(hintRes)
         dialogBinding.etArea.setText(preset)
         dialogBinding.etArea.setSelection(dialogBinding.etArea.text?.length ?: 0)
-        AlertDialog.Builder(requireContext())
-            .setTitle(titleRes)
+        val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton(R.string.mine_apply_submit) { _, _ ->
-                val area = dialogBinding.etArea.text?.toString()?.trim().orEmpty()
-                if (area.isBlank()) {
-                    Toast.makeText(requireContext(), R.string.mine_apply_area_empty, Toast.LENGTH_SHORT).show()
-                } else {
-                    onSubmit(area)
-                }
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        ClickUtils.applySingleDebouncing(dialogBinding.btnCancel) { dialog.dismiss() }
+        ClickUtils.applySingleDebouncing(dialogBinding.btnSubmit) {
+            val area = dialogBinding.etArea.text?.toString()?.trim().orEmpty()
+            if (area.isBlank()) {
+                Toast.makeText(requireContext(), R.string.mine_apply_area_empty, Toast.LENGTH_SHORT).show()
+            } else {
+                dialog.dismiss()
+                onSubmit(area)
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        }
+        dialog.show()
     }
 
     private fun bindSettings(storageText: String) {

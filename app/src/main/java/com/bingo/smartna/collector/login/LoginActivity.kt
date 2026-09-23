@@ -13,6 +13,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.bingo.smartna.MainActivity
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseActivity
+import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.databinding.ActivityLoginBinding
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ClickUtils
@@ -20,7 +21,8 @@ import com.blankj.utilcode.util.ClickUtils
 class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
 
     private var agreed = false
-    private var accountMode = false
+    private var enterpriseMode = false
+    private var enterpriseRole = UserRole.STAFF
 
     override fun inflateBinding() = ActivityLoginBinding.inflate(layoutInflater)
 
@@ -29,8 +31,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
             openMain()
             return
         }
-        applySloganGradient(binding.tvSlogan1)
-        applySloganGradient(binding.tvSlogan2)
+        applySloganGradient()
         bindAgreeText()
         renderMode()
         refreshLoginEnabled()
@@ -74,33 +75,17 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
             binding.ivAgree.text = if (agreed) "✓" else ""
             refreshLoginEnabled()
         }
-        ClickUtils.applySingleDebouncing(binding.btnLogin) {
-            if (accountMode) {
-                when (viewModel.loginByAccount(username(), password())) {
-                    is AccountLoginResult.Success -> openMain()
-                    AccountLoginResult.AccountNotFound ->
-                        Toast.makeText(this, R.string.login_account_not_found, Toast.LENGTH_SHORT).show()
-                    AccountLoginResult.PasswordTooShort ->
-                        Toast.makeText(this, R.string.login_password_short, Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                viewModel.loginByPhone(phone())
-                openMain()
-            }
+        ClickUtils.applySingleDebouncing(binding.btnLogin) { submit() }
+        ClickUtils.applySingleDebouncing(binding.tvSwitchMode) {
+            enterpriseMode = !enterpriseMode
+            renderMode()
+            refreshLoginEnabled()
         }
-        binding.tabPhone.setOnClickListener {
-            if (accountMode) {
-                accountMode = false
-                renderMode()
-                refreshLoginEnabled()
-            }
+        ClickUtils.applySingleDebouncing(binding.tabStaff) {
+            selectEnterpriseRole(UserRole.STAFF)
         }
-        binding.tabAccount.setOnClickListener {
-            if (!accountMode) {
-                accountMode = true
-                renderMode()
-                refreshLoginEnabled()
-            }
+        ClickUtils.applySingleDebouncing(binding.tabLead) {
+            selectEnterpriseRole(UserRole.LEAD)
         }
 
         viewModel.countdown.observe(this) { seconds ->
@@ -114,28 +99,73 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
         }
     }
 
-    private fun renderMode() {
-        binding.phonePanel.visibility = if (accountMode) View.GONE else View.VISIBLE
-        binding.accountPanel.visibility = if (accountMode) View.VISIBLE else View.GONE
-        binding.tvLoginTitle.setText(if (accountMode) R.string.login_account_title else R.string.login_title)
-        binding.tvLoginSubtitle.setText(
-            if (accountMode) R.string.login_account_subtitle else R.string.login_subtitle
-        )
-        binding.btnLogin.setText(if (accountMode) R.string.login_account_submit else R.string.login_submit)
-        bindModeTab(binding.tabPhone, !accountMode)
-        bindModeTab(binding.tabAccount, accountMode)
+    private fun selectEnterpriseRole(role: UserRole) {
+        if (enterpriseRole == role) return
+        enterpriseRole = role
+        renderEnterpriseRoleTabs()
+        refreshLoginEnabled()
     }
 
-    private fun bindModeTab(tab: TextView, selected: Boolean) {
-        tab.setBackgroundResource(if (selected) R.drawable.bg_login_mode_selected else 0)
+    private fun submit() {
+        if (enterpriseMode) {
+            when (viewModel.loginByAccount(username(), password(), enterpriseRole)) {
+                is AccountLoginResult.Success -> openMain()
+                AccountLoginResult.AccountNotFound ->
+                    Toast.makeText(this, R.string.login_account_not_found, Toast.LENGTH_SHORT).show()
+                AccountLoginResult.PasswordTooShort ->
+                    Toast.makeText(this, R.string.login_password_short, Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            viewModel.loginByPhone(phone())
+            openMain()
+        }
+    }
+
+    private fun renderMode() {
+        binding.phonePanel.visibility = if (enterpriseMode) View.GONE else View.VISIBLE
+        binding.accountPanel.visibility = if (enterpriseMode) View.VISIBLE else View.GONE
+        binding.tvLoginSubtitle.visibility = if (enterpriseMode) View.GONE else View.VISIBLE
+        binding.tvLoginTitle.setText(
+            if (enterpriseMode) R.string.login_enterprise_title else R.string.login_title
+        )
+        binding.btnLogin.setText(
+            if (enterpriseMode) R.string.login_account_submit else R.string.login_submit
+        )
+        binding.tvSwitchMode.setText(
+            if (enterpriseMode) R.string.login_personal_switch else R.string.login_enterprise
+        )
+        if (enterpriseMode) {
+            renderEnterpriseRoleTabs()
+        }
+    }
+
+    private fun renderEnterpriseRoleTabs() {
+        bindRoleTab(binding.tabStaff, enterpriseRole == UserRole.STAFF)
+        bindRoleTab(binding.tabLead, enterpriseRole == UserRole.LEAD)
+        binding.etUsername.setHint(
+            if (enterpriseRole == UserRole.STAFF) {
+                R.string.login_account_hint_staff
+            } else {
+                R.string.login_account_hint_lead
+            }
+        )
+    }
+
+    private fun bindRoleTab(tab: TextView, selected: Boolean) {
+        tab.setBackgroundResource(
+            if (selected) R.drawable.bg_login_mode_selected else android.R.color.transparent
+        )
         tab.setTextColor(
-            ContextCompat.getColor(this, if (selected) R.color.card_white else R.color.text_dark)
+            ContextCompat.getColor(
+                this,
+                if (selected) R.color.card_white else R.color.text_dark
+            )
         )
         tab.paint.isFakeBoldText = selected
     }
 
     private fun openMain() {
-        ActivityUtils.startActivity(MainActivity::class.java)
+        startActivity(MainActivity.freshStart(this))
         finish()
     }
 
@@ -148,19 +178,19 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
         val counting = (viewModel.countdown.value ?: 0) > 0
         val enabled = !counting && phone().length == 11
         binding.tvGetCode.setTextColor(
-            ContextCompat.getColor(this, if (enabled) R.color.blue_text else R.color.text_gray)
+            ContextCompat.getColor(this, if (enabled) R.color.brand_orange else R.color.text_gray)
         )
     }
 
     private fun refreshLoginEnabled() {
-        val enabled = agreed && if (accountMode) {
+        val enabled = agreed && if (enterpriseMode) {
             username().isNotBlank() && password().length >= 4
         } else {
             phone().length == 11 && code().length == 4
         }
         binding.btnLogin.isEnabled = enabled
         binding.btnLogin.setBackgroundResource(
-            if (enabled) R.drawable.bg_btn_primary else R.drawable.bg_btn_disabled
+            if (enabled) R.drawable.bg_btn_login else R.drawable.bg_btn_disabled
         )
         binding.btnLogin.setTextColor(
             ContextCompat.getColor(
@@ -176,14 +206,14 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
             getString(R.string.login_agree_and) +
             getString(R.string.login_agree_privacy)
         val span = SpannableString(full)
-        val blue = ContextCompat.getColor(this, R.color.blue_text)
+        val orange = ContextCompat.getColor(this, R.color.brand_orange)
         val user = getString(R.string.login_agree_user)
         val privacy = getString(R.string.login_agree_privacy)
         val userStart = full.indexOf(user)
-        span.setSpan(ForegroundColorSpan(blue), userStart, userStart + user.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        span.setSpan(ForegroundColorSpan(orange), userStart, userStart + user.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         val privacyStart = full.indexOf(privacy)
         span.setSpan(
-            ForegroundColorSpan(blue),
+            ForegroundColorSpan(orange),
             privacyStart,
             privacyStart + privacy.length,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -191,17 +221,18 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
         binding.tvAgree.text = span
     }
 
-    private fun applySloganGradient(view: TextView) {
+    private fun applySloganGradient() {
+        val view = binding.tvSlogan
         view.post {
-            if (view.width <= 0) return@post
+            if (view.width <= 0 || view.height <= 0) return@post
             view.paint.shader = LinearGradient(
                 0f,
                 0f,
                 0f,
-                view.textSize,
+                view.height.toFloat(),
                 intArrayOf(
-                    ContextCompat.getColor(this, R.color.blue_light),
-                    ContextCompat.getColor(this, R.color.blue_deep)
+                    ContextCompat.getColor(this, R.color.brand_orange_light),
+                    ContextCompat.getColor(this, R.color.brand_orange)
                 ),
                 null,
                 Shader.TileMode.CLAMP

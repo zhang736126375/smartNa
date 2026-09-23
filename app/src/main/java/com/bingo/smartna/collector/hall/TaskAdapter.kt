@@ -16,10 +16,14 @@ import com.blankj.utilcode.util.ClickUtils
 data class HallTaskItem(
     val task: Task,
     val claimed: Boolean,
-    val quotaLeft: Int
+    val quotaLeft: Int,
+    val doneClips: Int = 0,
+    val uploadedClips: Int = 0,
+    val canCaptureMore: Boolean = true
 )
 
 class TaskAdapter(
+    private val onItemClick: (Task) -> Unit,
     private val onClaim: (Task) -> Unit,
     private val onCapture: (Task) -> Unit
 ) : ListAdapter<HallTaskItem, TaskAdapter.Holder>(Diff) {
@@ -30,13 +34,19 @@ class TaskAdapter(
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder.bind(getItem(position), onClaim, onCapture)
+        holder.bind(getItem(position), onItemClick, onClaim, onCapture)
     }
 
     class Holder(private val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: HallTaskItem, onClaim: (Task) -> Unit, onCapture: (Task) -> Unit) {
+        fun bind(
+            item: HallTaskItem,
+            onItemClick: (Task) -> Unit,
+            onClaim: (Task) -> Unit,
+            onCapture: (Task) -> Unit
+        ) {
             val context = binding.root.context
             val task = item.task
+            ClickUtils.applySingleDebouncing(binding.root) { onItemClick(task) }
             binding.tvKind.text = task.kind.label
             binding.tvPriority.text = task.priority.label
             binding.tvPriority.setBackgroundResource(

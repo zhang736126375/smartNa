@@ -3,12 +3,10 @@ package com.bingo.smartna.collector.hall
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.lifecycle.ViewModelProvider
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseFragment
 import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.data.model.HallCategory
-import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.databinding.FragmentHallBinding
 
 class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), HallCategoryNavigator {
@@ -23,7 +21,7 @@ class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), Ha
         FragmentHallBinding.inflate(inflater, container, false)
 
     override fun initViewModel(): CollectorViewModel {
-        return ViewModelProvider(requireActivity())[CollectorViewModel::class.java]
+        return com.bingo.smartna.collector.CollectorViewModels.get(requireActivity().application)
     }
 
     override fun initData() {
@@ -32,11 +30,19 @@ class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), Ha
             refreshBackCallback()
         }
         if (childFragmentManager.findFragmentById(R.id.hallContainer) == null) {
-            childFragmentManager.beginTransaction()
-                .replace(R.id.hallContainer, HallCategoryFragment())
-                .commit()
+            showHome(replace = true)
         }
         refreshBackCallback()
+    }
+
+    override fun initViewObservable() {
+        viewModel.ui.observe(viewLifecycleOwner) {
+            if (childFragmentManager.backStackEntryCount > 0) return@observe
+            val current = childFragmentManager.findFragmentById(R.id.hallContainer) ?: return@observe
+            if (current !is HallCategoryFragment) {
+                showHome(replace = true)
+            }
+        }
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
@@ -54,13 +60,11 @@ class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), Ha
     }
 
     override fun openCategory(category: HallCategory) {
-        val list = if (viewModel.ui.value?.role == UserRole.CROWD) {
-            CrowdHallTaskListFragment.newInstance(category.id)
-        } else {
-            HallTaskListFragment.newInstance(category.id)
-        }
         childFragmentManager.beginTransaction()
-            .replace(R.id.hallContainer, list)
+            .replace(
+                R.id.hallContainer,
+                CrowdHallTaskListFragment.newInstance(category.id)
+            )
             .addToBackStack(TAG_LIST)
             .commit()
     }
@@ -75,6 +79,21 @@ class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), Ha
         while (childFragmentManager.backStackEntryCount > 0) {
             childFragmentManager.popBackStackImmediate()
         }
+        showHome(replace = true)
+    }
+
+    private fun showHome(replace: Boolean) {
+        if (!replace) {
+            childFragmentManager.beginTransaction()
+                .replace(R.id.hallContainer, HallCategoryFragment())
+                .commit()
+            return
+        }
+        val current = childFragmentManager.findFragmentById(R.id.hallContainer)
+        if (current is HallCategoryFragment) return
+        childFragmentManager.beginTransaction()
+            .replace(R.id.hallContainer, HallCategoryFragment())
+            .commit()
     }
 
     private companion object {

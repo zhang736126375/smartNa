@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.SmartNa" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/blue_primary</item>
-        <item name="colorPrimaryVariant">@color/blue_deep</item>
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryVariant">@color/brand_primary_active</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">@color/blue_primary</item>
-        <item name="colorSecondaryVariant">@color/blue_deep</item>
+        <item name="colorSecondary">@color/brand_primary</item>
+        <item name="colorSecondaryVariant">@color/brand_primary_active</item>
         <item name="colorOnSecondary">@color/white</item>
-        <item name="android:statusBarColor">@color/bg_gray</item>
+        <item name="android:statusBarColor">@color/bg_page</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowBackground">@color/bg_gray</item>
+        <item name="android:windowBackground">@color/bg_page</item>
         <item name="android:navigationBarColor">@color/card_white</item>
         <item name="android:textColorPrimary">@color/text_dark</item>
         <item name="bottomNavigationStyle">@style/Widget.SmartNa.BottomNav</item>
@@ -27,6 +27,29 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowBackground">@color/space_black</item>
         <item name="android:navigationBarColor">@color/card_white</item>
+    </style>
+
+    <style name="MainTabItem">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="MainTabIcon">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
+
+    <style name="MainTabLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:textSize">11sp</item>
     </style>
 
     <style name="Widget.SmartNa.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView">

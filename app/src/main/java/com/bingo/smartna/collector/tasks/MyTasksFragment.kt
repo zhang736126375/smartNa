@@ -3,36 +3,49 @@ package com.bingo.smartna.collector.tasks
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseFragment
 import com.bingo.smartna.collector.CollectorViewModel
+import com.bingo.smartna.collector.CollectorViewModels
 import com.bingo.smartna.collector.HallNavigator
 import com.bingo.smartna.collector.data.model.TaskStatus
+import com.bingo.smartna.collector.hall.HallTaskActions
 import com.bingo.smartna.databinding.FragmentMyTasksBinding
 
 class MyTasksFragment : BaseFragment<FragmentMyTasksBinding, CollectorViewModel>() {
 
     private var selected = TaskStatus.IN_PROGRESS
-    private val adapter = UserTaskAdapter { task ->
-        when (task.status) {
-            TaskStatus.IN_PROGRESS -> viewModel.submitForReview(task)
-            TaskStatus.REVIEWING -> viewModel.approve(task)
-            TaskStatus.DONE -> Unit
+    private val adapter = UserTaskAdapter(
+        onCapture = { HallTaskActions.openCapture(requireContext(), it) },
+        onSubmitReview = { userTask ->
+            if (viewModel.canSubmitReview(userTask)) {
+                viewModel.submitForReview(userTask)
+                Toast.makeText(requireContext(), R.string.tasks_submit_done, Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), R.string.tasks_submit_need_upload, Toast.LENGTH_SHORT).show()
+            }
+        },
+        onApprove = { userTask ->
+            viewModel.approve(userTask)
+            Toast.makeText(requireContext(), R.string.tasks_approve_done, Toast.LENGTH_SHORT).show()
+        },
+        onReject = { userTask ->
+            viewModel.reject(userTask)
+            Toast.makeText(requireContext(), R.string.tasks_reject_done, Toast.LENGTH_SHORT).show()
         }
-    }
+    )
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?) =
         FragmentMyTasksBinding.inflate(inflater, container, false)
 
     override fun initViewModel(): CollectorViewModel {
-        return ViewModelProvider(requireActivity())[CollectorViewModel::class.java]
+        return CollectorViewModels.get(requireActivity().application)
     }
 
     override fun initData() {
-        binding.rvTasks.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         binding.rvTasks.adapter = adapter
         binding.tabInProgress.setOnClickListener { selected = TaskStatus.IN_PROGRESS; refreshTabs() }
         binding.tabReviewing.setOnClickListener { selected = TaskStatus.REVIEWING; refreshTabs() }

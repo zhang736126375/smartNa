@@ -21,7 +21,7 @@ class WalletFragment : BaseFragment<FragmentWalletBinding, CollectorViewModel>()
         FragmentWalletBinding.inflate(inflater, container, false)
 
     override fun initViewModel(): CollectorViewModel {
-        return ViewModelProvider(requireActivity())[CollectorViewModel::class.java]
+        return com.bingo.smartna.collector.CollectorViewModels.get(requireActivity().application)
     }
 
     override fun initData() {

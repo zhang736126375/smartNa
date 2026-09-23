@@ -40,13 +40,10 @@ class LoginViewModel(application: Application) : BaseViewModel(application) {
         prefs.savePhoneLogin(phone)
     }
 
-    fun loginByAccount(username: String, password: String): AccountLoginResult {
+    fun loginByAccount(username: String, password: String, role: UserRole): AccountLoginResult {
+        if (username.isBlank()) return AccountLoginResult.AccountNotFound
         if (password.length < 4) return AccountLoginResult.PasswordTooShort
-        val role = when (username.trim()) {
-            ACCOUNT_STAFF -> UserRole.STAFF
-            ACCOUNT_LEAD -> UserRole.LEAD
-            else -> return AccountLoginResult.AccountNotFound
-        }
+        if (role != UserRole.STAFF && role != UserRole.LEAD) return AccountLoginResult.AccountNotFound
         prefs.saveAccountLogin(username.trim(), role)
         return AccountLoginResult.Success(role)
     }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_gray"
@@ -12,14 +11,86 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
+    <LinearLayout
+        android:id="@+id/tabBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:background="@color/card_white"
-        app:itemHorizontalTranslationEnabled="false"
-        app:itemIconTint="@color/selector_tab_color"
-        app:itemTextColor="@color/selector_tab_color"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/menu_main_tabs" />
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/tabHall"
+            style="@style/MainTabItem">
+
+            <ImageView
+                android:id="@+id/iconHall"
+                style="@style/MainTabIcon"
+                android:src="@drawable/ic_tab_hall" />
+
+            <TextView
+                android:id="@+id/labelHall"
+                style="@style/MainTabLabel"
+                android:text="@string/tab_hall" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tabTasks"
+            style="@style/MainTabItem">
+
+            <ImageView
+                android:id="@+id/iconTasks"
+                style="@style/MainTabIcon"
+                android:src="@drawable/ic_tab_tasks" />
+
+            <TextView
+                android:id="@+id/labelTasks"
+                style="@style/MainTabLabel"
+                android:text="@string/tab_tasks" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tabDevice"
+            style="@style/MainTabItem">
+
+            <ImageView
+                android:id="@+id/iconDevice"
+                style="@style/MainTabIcon"
+                android:src="@drawable/ic_tab_device" />
+
+            <TextView
+                android:id="@+id/labelDevice"
+                style="@style/MainTabLabel"
+                android:text="@string/tab_device" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tabWallet"
+            style="@style/MainTabItem">
+
+            <ImageView
+                android:id="@+id/iconWallet"
+                style="@style/MainTabIcon"
+                android:src="@drawable/ic_tab_wallet" />
+
+            <TextView
+                android:id="@+id/labelWallet"
+                style="@style/MainTabLabel"
+                android:text="@string/tab_wallet" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tabMine"
+            style="@style/MainTabItem">
+
+            <ImageView
+                android:id="@+id/iconMine"
+                style="@style/MainTabIcon"
+                android:src="@drawable/ic_tab_mine" />
+
+            <TextView
+                android:id="@+id/labelMine"
+                style="@style/MainTabLabel"
+                android:text="@string/tab_mine" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

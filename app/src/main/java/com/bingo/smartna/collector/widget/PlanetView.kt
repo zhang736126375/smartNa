@@ -8,6 +8,8 @@ import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
+import com.bingo.smartna.R
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -20,7 +22,7 @@ class PlanetView @JvmOverloads constructor(
 
     private val orbitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = dp(1.2f)
+        strokeWidth = dp(1.1f)
     }
     private val starPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -29,24 +31,24 @@ class PlanetView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val cx = width / 2f
-        val cy = height * 0.44f
-        val planetR = min(width, height) * 0.17f
+        val cy = height * 0.42f
+        val planetR = min(width, height) * 0.19f
 
         for (i in 1..6) {
-            orbitPaint.color = Color.argb((255 * (0.10f + i * 0.035f)).toInt(), 255, 255, 255)
-            canvas.drawCircle(cx, cy, planetR * (1.35f + i * 0.55f), orbitPaint)
+            orbitPaint.color = Color.argb((255 * (0.12f + i * 0.028f)).toInt(), 255, 255, 255)
+            canvas.drawCircle(cx, cy, planetR * (1.32f + i * 0.52f), orbitPaint)
         }
 
         val random = Random(42)
-        repeat(46) {
+        repeat(52) {
             val x = random.nextFloat() * width
             val y = random.nextFloat() * height
-            val r = 1f + random.nextFloat() * 2.2f
+            val r = 1f + random.nextFloat() * 2.4f
             val dx = x - cx
             val dy = y - cy
-            if (dx * dx + dy * dy > planetR * planetR * 1.2f) {
+            if (dx * dx + dy * dy > planetR * planetR * 1.15f) {
                 starPaint.color = Color.argb(
-                    (255 * (0.15f + random.nextFloat() * 0.55f)).toInt(),
+                    (255 * (0.18f + random.nextFloat() * 0.62f)).toInt(),
                     255,
                     255,
                     255
@@ -57,20 +59,24 @@ class PlanetView @JvmOverloads constructor(
 
         glowPaint.shader = RadialGradient(
             cx,
-            cy,
-            planetR * 2.1f,
-            intArrayOf(Color.argb(89, 37, 99, 235), Color.TRANSPARENT),
+            cy + planetR * 0.25f,
+            planetR * 2.2f,
+            intArrayOf(Color.argb(110, 37, 99, 235), Color.TRANSPARENT),
             floatArrayOf(0f, 1f),
             Shader.TileMode.CLAMP
         )
-        canvas.drawCircle(cx, cy, planetR * 2.1f, glowPaint)
+        canvas.drawCircle(cx, cy, planetR * 2.2f, glowPaint)
 
         planetPaint.shader = RadialGradient(
-            cx - planetR * 0.15f,
-            cy + planetR * 0.35f,
-            planetR * 1.6f,
-            intArrayOf(Color.parseColor("#9EC9FF"), Color.parseColor("#2563EB"), Color.parseColor("#0F3FA8")),
-            floatArrayOf(0f, 0.45f, 1f),
+            cx - planetR * 0.12f,
+            cy + planetR * 0.42f,
+            planetR * 1.55f,
+            intArrayOf(
+                ContextCompat.getColor(context, R.color.brand_orange_light),
+                ContextCompat.getColor(context, R.color.brand_orange),
+                Color.parseColor("#0A1A4D")
+            ),
+            floatArrayOf(0f, 0.42f, 1f),
             Shader.TileMode.CLAMP
         )
         canvas.drawCircle(cx, cy, planetR, planetPaint)

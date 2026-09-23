@@ -1,41 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="blue_primary">#2563EB</color>
-    <color name="blue_deep">#1D4ED8</color>
+    <!-- Brand · 琥珀金 -->
+    <color name="brand_primary">#D97706</color>
+    <color name="brand_primary_hover">#F59E0B</color>
+    <color name="brand_primary_active">#B45309</color>
+    <color name="brand_soft">#FEF3C7</color>
+
+    <!-- Legacy aliases → amber tokens -->
+    <color name="brand_orange">@color/brand_primary</color>
+    <color name="brand_orange_light">@color/brand_primary_hover</color>
+    <color name="brand_orange_deep">@color/brand_primary_active</color>
+    <color name="brand_tint_bg">@color/brand_soft</color>
+    <color name="brand_tint_border">#FDE68A</color>
+    <color name="brand_tint_notice">@color/brand_soft</color>
+
+    <color name="blue_primary">@color/brand_primary</color>
+    <color name="blue_deep">@color/brand_primary_active</color>
+    <color name="blue_light">@color/brand_primary_hover</color>
+    <color name="blue_gradient_start">@color/brand_primary_hover</color>
+    <color name="blue_gradient_end">@color/brand_primary_active</color>
+    <color name="blue_text">@color/brand_primary</color>
+
+    <!-- Staff theme keeps navy -->
     <color name="staff_primary">#1E3A8A</color>
     <color name="staff_primary_dark">#172554</color>
-    <color name="blue_light">#6EA8FF</color>
-    <color name="blue_gradient_start">#3B82F6</color>
-    <color name="blue_gradient_end">#93C5FD</color>
-    <color name="blue_text">#2563EB</color>
 
-    <color name="bg_gray">#F5F6F7</color>
-    <color name="section_gray">#F0F1F3</color>
-    <color name="input_gray">#F0F1F3</color>
-    <color name="card_white">#FFFFFF</color>
-    <color name="text_dark">#17181A</color>
-    <color name="text_gray">#9A9FA5</color>
-    <color name="divider_gray">#ECEDEF</color>
-    <color name="btn_disabled">#E8E9EB</color>
-    <color name="btn_disabled_text">#B0B4B8</color>
+    <!-- Functional -->
+    <color name="price_emphasis">#92400E</color>
+    <color name="error">#DC2626</color>
+    <color name="success">#16A34A</color>
+    <color name="info">#2563EB</color>
+
+    <!-- Neutral -->
+    <color name="text_primary">#1C1917</color>
+    <color name="text_secondary">#57534E</color>
+    <color name="text_tertiary">#A8A29E</color>
+    <color name="bg_page">#FFFBEB</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="surface_muted">#F5F5F4</color>
+    <color name="border_default">#E7E5E4</color>
+
+    <!-- Legacy neutral aliases -->
+    <color name="bg_gray">@color/bg_page</color>
+    <color name="section_gray">@color/surface_muted</color>
+    <color name="input_gray">@color/surface_muted</color>
+    <color name="card_white">@color/surface_card</color>
+    <color name="text_dark">@color/text_primary</color>
+    <color name="text_gray">@color/text_secondary</color>
+    <color name="divider_gray">@color/border_default</color>
+    <color name="btn_disabled">#E7E5E4</color>
+    <color name="btn_disabled_text">@color/text_tertiary</color>
+
+    <!-- Category gradients -->
+    <color name="cat_life_start">#FCD34D</color>
+    <color name="cat_life_end">#F59E0B</color>
+    <color name="cat_produce_start">#D97706</color>
+    <color name="cat_produce_end">#92400E</color>
+    <color name="cat_agri_start">#FDE68A</color>
+    <color name="cat_agri_end">#FBBF24</color>
+    <color name="cat_entertain_start">#7DD3FC</color>
+    <color name="cat_entertain_end">#0EA5E9</color>
+    <color name="cat_warehouse_start">#D6B88C</color>
+    <color name="cat_warehouse_end">#A16207</color>
+    <color name="cat_catering_start">#A3B86B</color>
+    <color name="cat_catering_end">#65A30D</color>
+
+    <!-- Banner -->
+    <color name="banner_start">#F59E0B</color>
+    <color name="banner_end">#92400E</color>
 
     <color name="space_black">#050505</color>
     <color name="star_white">#B3FFFFFF</color>
     <color name="orbit_white">#33FFFFFF</color>
 
-    <color name="quota_black">#1A1B1D</color>
-    <color name="quota_number">#7DD3FC</color>
-    <color name="badge_red">#E5484D</color>
-    <color name="priority_high">#E5484D</color>
-    <color name="priority_doing">#2563EB</color>
-    <color name="priority_unlimited">#6B7280</color>
-    <color name="kind_tag_bg">#EEF3FF</color>
-    <color name="kind_tag_text">#2563EB</color>
-    <color name="chip_bg">#F0F1F3</color>
-    <color name="progress_track">#E8E9EB</color>
-    <color name="chevron_gray">#C9CDD2</color>
-    <color name="input_divider">#D8DBDE</color>
-    <color name="agree_border">#C9CDD1</color>
+    <color name="quota_black">#1C1917</color>
+    <color name="quota_number">#F59E0B</color>
+    <color name="badge_red">#DC2626</color>
+    <color name="priority_high">#DC2626</color>
+    <color name="priority_doing">@color/brand_primary</color>
+    <color name="priority_unlimited">#78716C</color>
+    <color name="kind_tag_bg">@color/brand_soft</color>
+    <color name="kind_tag_text">@color/brand_primary_active</color>
+    <color name="chip_bg">@color/surface_muted</color>
+    <color name="progress_track">@color/border_default</color>
+    <color name="chevron_gray">@color/text_tertiary</color>
+    <color name="input_divider">@color/border_default</color>
+    <color name="agree_border">@color/border_default</color>
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="white_28">#47FFFFFF</color>

@@ -1,6 +1,8 @@
 package com.bingo.smartna.collector.data
 
 import android.content.Context
+import com.bingo.smartna.collector.data.model.DeviceApplyStatus
+import com.bingo.smartna.collector.data.model.DeviceShipmentStatus
 import com.bingo.smartna.collector.data.model.UserRole
 
 /** 登录态、角色、提权申请、已连接设备。 */
@@ -102,12 +104,35 @@ class Prefs(context: Context) {
             .putString(KEY_CONNECTED_KIT, kitId)
             .putString(KEY_CONNECTED_QR, qr)
             .apply()
+        if (!isApplyCompleted) {
+            saveApplyCompleted(kitId)
+        }
     }
 
     fun clearConnectedDevice() {
         sp.edit()
             .remove(KEY_CONNECTED_KIT)
             .remove(KEY_CONNECTED_QR)
+            .apply()
+    }
+
+    val applyStatus: DeviceApplyStatus
+        get() = DeviceApplyStatus.fromName(sp.getString(KEY_APPLY_STATUS, null))
+
+    val isApplyCompleted: Boolean
+        get() = applyStatus == DeviceApplyStatus.COMPLETED
+
+    val applyKitId: String?
+        get() = sp.getString(KEY_APPLY_KIT, null)
+
+    val shipmentStatus: DeviceShipmentStatus
+        get() = DeviceShipmentStatus.fromName(sp.getString(KEY_SHIPMENT_STATUS, null))
+
+    fun saveApplyCompleted(kitId: String) {
+        sp.edit()
+            .putString(KEY_APPLY_STATUS, DeviceApplyStatus.COMPLETED.name)
+            .putString(KEY_APPLY_KIT, kitId)
+            .putString(KEY_SHIPMENT_STATUS, DeviceShipmentStatus.PENDING.name)
             .apply()
     }
 
@@ -122,5 +147,8 @@ class Prefs(context: Context) {
         const val KEY_UPGRADE_LEAD_AREA = "upgrade_lead_area"
         const val KEY_CONNECTED_KIT = "connected_kit"
         const val KEY_CONNECTED_QR = "connected_qr"
+        const val KEY_APPLY_STATUS = "device_apply_status"
+        const val KEY_APPLY_KIT = "device_apply_kit"
+        const val KEY_SHIPMENT_STATUS = "device_shipment_status"
     }
 }

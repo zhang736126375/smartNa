@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import com.bingo.smartna.base.ui.BaseViewModel
 import com.bingo.smartna.collector.data.Prefs
 import com.bingo.smartna.collector.data.mock.MockDataSource
+import com.bingo.smartna.collector.data.model.ClipRecord
+import com.bingo.smartna.collector.data.model.ClipUploadStatus
 import com.bingo.smartna.collector.data.model.Task
 import com.bingo.smartna.collector.data.model.TaskStatus
 import com.bingo.smartna.collector.data.model.TeamTaskRow
@@ -22,6 +24,7 @@ data class CollectorUiState(
     val quotaLeft: Map<String, Int> = emptyMap(),
     val claimedIds: Set<String> = emptySet(),
     val userTasks: List<UserTask> = emptyList(),
+    val uploadQueue: List<ClipRecord> = emptyList(),
     val walletBalance: Double = 0.0,
     val walletEntries: List<WalletEntry> = emptyList()
 ) {
@@ -47,6 +50,8 @@ data class CollectorUiState(
     fun inProgressCount() = userTasks.count { it.status == TaskStatus.IN_PROGRESS }
     fun reviewingCount() = userTasks.count { it.status == TaskStatus.REVIEWING }
     fun doneCount() = userTasks.count { it.status == TaskStatus.DONE }
+
+    fun userTaskFor(taskId: String): UserTask? = userTasks.find { it.task.id == taskId }
 }
 
 /**
@@ -56,12 +61,13 @@ data class CollectorUiState(
 class CollectorViewModel(application: Application) : BaseViewModel(application) {
 
     private val prefs = Prefs(application)
-    val hallTasks: List<Task> = MockDataSource.tasks
+    val hallTasks: List<Task> = MockDataSource.allTasks
     val teamTasks: List<TeamTaskRow> = MockDataSource.teamTasks
 
-    private val quotaLeft = MockDataSource.tasks.associate { it.id to it.quotaTotal }.toMutableMap()
+    private val quotaLeft = MockDataSource.allTasks.associate { it.id to it.quotaTotal }.toMutableMap()
     private val claimedIds = linkedSetOf<String>()
     private val userTasks = mutableListOf<UserTask>()
+    private val clipRecords = mutableListOf<ClipRecord>()
     private val walletEntries = mutableListOf<WalletEntry>()
     private var walletBalance = 0.0
     private var phone = prefs.phone.orEmpty()
@@ -86,6 +92,96 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
         quotaLeft[task.id] = left - 1
         claimedIds.add(task.id)
         userTasks.add(UserTask(task, TaskStatus.IN_PROGRESS, System.currentTimeMillis()))
+        emit()
+    }
+
+    fun recordDemoClip(taskId: String, durationMs: Long): ClipRecord? {
+        val index = userTasks.indexOfFirst { it.task.id == taskId }
+        if (index < 0) return null
+        val current = userTasks[index]
+        if (!current.canCaptureMoreDemo()) return null
+        val nextIndex = current.doneClips + 1
+        val record = ClipRecord(
+            id = "clip_${taskId}_$nextIndex",
+            taskId = taskId,
+            clipIndex = nextIndex,
+            status = ClipUploadStatus.LOCAL,
+            createdAt = System.currentTimeMillis(),
+            durationMs = durationMs
+        )
+        clipRecords.add(record)
+        userTasks[index] = current.copy(
+            doneClips = nextIndex,
+            task = current.task.copy(doneClips = nextIndex)
+        )
+        emit()
+        return record
+    }
+
+    fun rollbackDemoClip(clipId: String) {
+        val clipIndex = clipRecords.indexOfFirst { it.id == clipId }
+        if (clipIndex < 0) return
+        val clip = clipRecords[clipIndex]
+        clipRecords.removeAt(clipIndex)
+        val taskIndex = userTasks.indexOfFirst { it.task.id == clip.taskId }
+        if (taskIndex < 0) return
+        val current = userTasks[taskIndex]
+        val nextDone = (current.doneClips - 1).coerceAtLeast(0)
+        userTasks[taskIndex] = current.copy(
+            doneClips = nextDone,
+            task = current.task.copy(doneClips = nextDone)
+        )
+        emit()
+    }
+
+    fun completeUpload(clipId: String) {
+        val clipIndex = clipRecords.indexOfFirst { it.id == clipId }
+        if (clipIndex < 0) return
+        val clip = clipRecords[clipIndex]
+        clipRecords[clipIndex] = clip.copy(status = ClipUploadStatus.SUCCESS)
+        val taskIndex = userTasks.indexOfFirst { it.task.id == clip.taskId }
+        if (taskIndex < 0) return
+        val current = userTasks[taskIndex]
+        userTasks[taskIndex] = current.copy(uploadedClips = current.uploadedClips + 1)
+        emit()
+    }
+
+    fun canSubmitReview(userTask: UserTask): Boolean = userTask.canSubmitReviewDemo()
+
+    fun submitForReview(userTask: UserTask) {
+        if (!canSubmitReview(userTask)) return
+        replaceStatus(userTask, TaskStatus.REVIEWING)
+    }
+
+    fun approve(userTask: UserTask) {
+        if (userTask.status != TaskStatus.REVIEWING) return
+        val index = userTasks.indexOfFirst { it.task.id == userTask.task.id }
+        if (index < 0) return
+        userTasks[index] = userTasks[index].copy(status = TaskStatus.DONE)
+        walletBalance += userTask.task.reward
+        walletEntries.add(
+            0,
+            WalletEntry(
+                title = userTask.task.title,
+                amount = userTask.task.reward,
+                time = System.currentTimeMillis()
+            )
+        )
+        emit()
+    }
+
+    fun reject(userTask: UserTask) {
+        if (userTask.status != TaskStatus.REVIEWING) return
+        val index = userTasks.indexOfFirst { it.task.id == userTask.task.id }
+        if (index < 0) return
+        val current = userTasks[index]
+        userTasks[index] = current.copy(
+            status = TaskStatus.IN_PROGRESS,
+            doneClips = 0,
+            uploadedClips = 0,
+            task = current.task.copy(doneClips = 0)
+        )
+        clipRecords.removeAll { it.taskId == userTask.task.id }
         emit()
     }
 
@@ -116,25 +212,19 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
         upgradeTo(UserRole.LEAD, area)
     }
 
-    fun submitForReview(userTask: UserTask) {
-        replaceStatus(userTask, TaskStatus.REVIEWING)
+    /** 换账号后 Activity 会重建，这里同步 Prefs 里的新身份。 */
+    fun reloadFromPrefs() {
+        phone = prefs.phone.orEmpty()
+        displayName = prefs.displayName
+        role = prefs.role
+        staffUpgradePending = prefs.staffUpgradePending
+        leadUpgradePending = prefs.leadUpgradePending
+        emit()
+        _loggedOut.value = false
     }
 
-    fun approve(userTask: UserTask) {
-        if (userTask.status != TaskStatus.REVIEWING) return
-        val index = userTasks.indexOfFirst { it.task.id == userTask.task.id }
-        if (index < 0) return
-        userTasks[index] = userTasks[index].copy(status = TaskStatus.DONE)
-        walletBalance += userTask.task.reward
-        walletEntries.add(
-            0,
-            WalletEntry(
-                title = userTask.task.title,
-                amount = userTask.task.reward,
-                time = System.currentTimeMillis()
-            )
-        )
-        emit()
+    fun consumeLoggedOut() {
+        _loggedOut.value = false
     }
 
     fun logout() {
@@ -146,9 +236,10 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
         leadUpgradePending = false
         userTasks.clear()
         claimedIds.clear()
+        clipRecords.clear()
         walletEntries.clear()
         walletBalance = 0.0
-        MockDataSource.tasks.forEach { quotaLeft[it.id] = it.quotaTotal }
+        MockDataSource.allTasks.forEach { quotaLeft[it.id] = it.quotaTotal }
         emit()
         _loggedOut.value = true
     }
@@ -173,6 +264,7 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
         quotaLeft = quotaLeft.toMap(),
         claimedIds = claimedIds.toSet(),
         userTasks = userTasks.toList(),
+        uploadQueue = clipRecords.toList(),
         walletBalance = walletBalance,
         walletEntries = walletEntries.toList()
     )

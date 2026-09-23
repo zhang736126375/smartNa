@@ -19,7 +19,7 @@ class HallCategoryFragment : BaseFragment<FragmentHallCategoryBinding, Collector
         FragmentHallCategoryBinding.inflate(inflater, container, false)
 
     override fun initViewModel(): CollectorViewModel {
-        return ViewModelProvider(requireActivity())[CollectorViewModel::class.java]
+        return com.bingo.smartna.collector.CollectorViewModels.get(requireActivity().application)
     }
 
     override fun initData() {
@@ -30,7 +30,7 @@ class HallCategoryFragment : BaseFragment<FragmentHallCategoryBinding, Collector
     override fun initViewObservable() {
         viewModel.ui.observe(viewLifecycleOwner) { state ->
             val role = state.role
-            val items = HallCategory.homeEntries(role).map { category ->
+            val items = HallCategory.homeEntries().map { category ->
                 val remain = viewModel.hallTasks.count { task ->
                     category.matches(task) &&
                         task.id !in state.claimedIds &&

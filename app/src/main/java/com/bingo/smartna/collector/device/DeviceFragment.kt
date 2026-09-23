@@ -20,6 +20,10 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
         ActivityResultContracts.StartActivityForResult()
     ) { renderState() }
 
+    private val applyLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { renderState() }
+
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?) =
         FragmentDeviceBinding.inflate(inflater, container, false)
 
@@ -30,16 +34,21 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
         val toast = {
             Toast.makeText(requireContext(), R.string.demo_dev_toast, Toast.LENGTH_SHORT).show()
         }
-        ClickUtils.applySingleDebouncing(binding.btnApply) { toast() }
+        ClickUtils.applySingleDebouncing(binding.btnApply) {
+            applyLauncher.launch(Intent(requireContext(), DeviceApplyEntryActivity::class.java))
+        }
         ClickUtils.applySingleDebouncing(binding.btnMore) { toast() }
         ClickUtils.applySingleDebouncing(binding.btnConnect) {
             connectLauncher.launch(Intent(requireContext(), ConnectKitActivity::class.java))
         }
-        ClickUtils.applySingleDebouncing(binding.btnEgoDemo) {
-            startActivity(Intent(requireContext(), EgoUsbDemoActivity::class.java))
+        ClickUtils.applySingleDebouncing(binding.btnViewApply) { openApplyProgress() }
+        ClickUtils.applySingleDebouncing(binding.btnViewApplyConnected) { openApplyProgress() }
+        ClickUtils.applySingleDebouncing(binding.btnConnectFromApplied) {
+            connectLauncher.launch(Intent(requireContext(), ConnectKitActivity::class.java))
         }
         ClickUtils.applySingleDebouncing(binding.btnDisconnect) {
             Prefs(requireContext()).clearConnectedDevice()
+            Toast.makeText(requireContext(), R.string.device_unbind_done, Toast.LENGTH_SHORT).show()
             renderState()
         }
         renderState()
@@ -50,16 +59,35 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
         if (view != null) renderState()
     }
 
+    private fun openApplyProgress() {
+        applyLauncher.launch(Intent(requireContext(), DeviceApplyEntryActivity::class.java))
+    }
+
     private fun renderState() {
         val prefs = Prefs(requireContext())
         val kit = DeviceKit.fromId(prefs.connectedKitId)
-        if (kit == null) {
-            binding.emptyPanel.visibility = View.VISIBLE
-            binding.connectedPanel.visibility = View.GONE
-        } else {
-            binding.emptyPanel.visibility = View.GONE
-            binding.connectedPanel.visibility = View.VISIBLE
-            binding.tvConnectedName.setText(kit.titleRes)
+        val showApplyProgress = prefs.isApplyCompleted
+        when {
+            kit != null -> {
+                binding.emptyPanel.visibility = View.GONE
+                binding.appliedPanel.visibility = View.GONE
+                binding.connectedPanel.visibility = View.VISIBLE
+                binding.tvConnectedName.setText(kit.titleRes)
+                binding.connectedApplyTags.visibility = if (showApplyProgress) View.VISIBLE else View.GONE
+                binding.btnViewApplyConnected.visibility = if (showApplyProgress) View.VISIBLE else View.GONE
+            }
+            prefs.isApplyCompleted -> {
+                binding.emptyPanel.visibility = View.GONE
+                binding.appliedPanel.visibility = View.VISIBLE
+                binding.connectedPanel.visibility = View.GONE
+                val appliedKit = DeviceKit.fromId(prefs.applyKitId) ?: DeviceKit.EGO
+                binding.tvAppliedKitName.text = getString(appliedKit.titleRes)
+            }
+            else -> {
+                binding.emptyPanel.visibility = View.VISIBLE
+                binding.appliedPanel.visibility = View.GONE
+                binding.connectedPanel.visibility = View.GONE
+            }
         }
     }
 }

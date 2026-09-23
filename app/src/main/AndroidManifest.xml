@@ -39,8 +39,12 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".collector.device.DeviceApplyEntryActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".collector.device.ConnectKitActivity"
             android:exported="false" />
@@ -49,11 +53,15 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".collector.hall.TaskDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".collector.capture.CaptureActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".collector.device.EgoUsbDemoActivity"
+            android:name=".collector.upload.UploadActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
     </application>
