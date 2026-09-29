@@ -59,6 +59,8 @@ class UserTaskAdapter(
                     }
                     if (item.canCaptureMoreDemo()) {
                         binding.btnSecondary.visibility = View.VISIBLE
+                        binding.btnSecondary.setBackgroundResource(R.drawable.bg_btn_ghost)
+                        binding.btnSecondary.setTextColor(context.getColor(R.color.brand_primary_active))
                         binding.btnSecondary.text = context.getString(
                             if (item.doneClips > 0) R.string.tasks_continue_capture else R.string.tasks_go_capture
                         )

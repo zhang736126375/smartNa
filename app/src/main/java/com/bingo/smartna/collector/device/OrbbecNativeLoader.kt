@@ -16,6 +16,7 @@ object OrbbecNativeLoader {
         System.loadLibrary("c++_shared")
         System.loadLibrary("OrbbecSDK")
         System.loadLibrary("obsensor_jni")
+        System.loadLibrary("orbbecsdkexamples")
         loaded = true
         Log.i(TAG, "Orbbec native libraries loaded")
     }

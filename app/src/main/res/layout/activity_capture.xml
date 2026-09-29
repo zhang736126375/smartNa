@@ -1,189 +1,375 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/space_black"
-    android:keepScreenOn="true"
-    android:orientation="vertical">
+    android:background="@color/capture_hud"
+    android:keepScreenOn="true">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp">
-
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="start|center_vertical"
-            android:layout_marginStart="8dp"
-            android:contentDescription="@string/hall_back"
-            android:padding="8dp"
-            android:src="@drawable/ic_back"
-            app:tint="@color/white" />
-
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:ellipsize="end"
-            android:maxWidth="240dp"
-            android:maxLines="1"
-            android:text="@string/capture_title"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-    </FrameLayout>
-
-    <TextView
-        android:id="@+id/tvProgress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:textColor="@color/star_white"
-        android:textSize="13sp" />
+        android:paddingTop="6dp"
+        android:paddingEnd="20dp">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <FrameLayout
-            android:id="@+id/demoPanel"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_video_placeholder">
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/recChip"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_hchip_rec"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="12dp">
+
+                <View
+                    android:id="@+id/recDot"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/bg_dot_rec" />
+
+                <TextView
+                    android:id="@+id/tvRecLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/capture_ready"
+                    android:textColor="@color/rec_red"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/tvPreviewHint"
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_hchip"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="#EBD9C3"
+                android:textSize="11.5sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="@string/hall_back"
+                android:padding="8dp"
+                android:src="@drawable/ic_close"
+                app:tint="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvProgress"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_hchip"
+                android:gravity="center"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="#EBD9C3"
+                android:textSize="11.5sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDeviceStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_hchip"
+                android:gravity="center"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="@string/capture_device_status_ready"
+                android:textColor="#EBD9C3"
+                android:textSize="11.5sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:layout_weight="1">
+
+            <FrameLayout
+                android:id="@+id/demoPanel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/capture_hud">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1.5dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/bg_scanline" />
+            </FrameLayout>
+
+            <androidx.camera.view.PreviewView
+                android:id="@+id/previewView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="start|top"
+                android:background="@drawable/bg_hud_corner_tl" />
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="end|top"
+                android:background="@drawable/bg_hud_corner_tr" />
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="start|bottom"
+                android:background="@drawable/bg_hud_corner_bl" />
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="end|bottom"
+                android:background="@drawable/bg_hud_corner_br" />
+
+            <LinearLayout
+                android:layout_width="140dp"
+                android:layout_height="100dp"
                 android:layout_gravity="center"
-                android:text="@string/capture_demo_preview_hint"
-                android:textColor="@color/star_white"
-                android:textSize="16sp" />
+                android:background="@drawable/bg_hand_frame"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_hand" />
+
+                <TextView
+                    android:id="@+id/tvPreviewHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/capture_demo_preview_hint"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="14dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_hchip_ok"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="12dp">
+
+                    <View
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:background="@drawable/bg_dot_hud_ok" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="@string/capture_stable"
+                        android:textColor="@color/hud_ok"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_hchip_gold"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:text="@string/capture_hd"
+                    android:textColor="@color/hud_gold"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:paddingBottom="8dp">
 
             <TextView
                 android:id="@+id/tvRecTimer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|start"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:textColor="@color/brand_orange"
-                android:textSize="14sp"
+                android:letterSpacing="0.04"
+                android:text="@string/capture_timer_zero"
+                android:textColor="@color/white"
+                android:textSize="56sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.08"
+                android:text="@string/capture_timecode"
+                android:textColor="@color/hud_muted"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/capture_demo_hint"
+                android:textColor="@color/hud_muted"
+                android:textSize="11.5sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/segmentRow"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:id="@+id/bottomPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="28dp">
+
+            <TextView
+                android:id="@+id/btnPause"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_btn_ghost_dark"
+                android:gravity="center"
+                android:text="@string/capture_pause"
+                android:textColor="@color/white"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/tvDeviceStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:background="#99000000"
+                android:id="@+id/btnRecord"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_marginStart="12dp"
+                android:layout_weight="2"
+                android:background="@drawable/bg_btn_white"
                 android:gravity="center"
-                android:paddingStart="16dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="10dp"
-                android:text="@string/capture_device_status_ready"
-                android:textColor="@color/star_white"
-                android:textSize="13sp" />
-        </FrameLayout>
+                android:text="@string/capture_demo_start"
+                android:textColor="@color/capture_hud"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
 
-        <androidx.camera.view.PreviewView
-            android:id="@+id/previewView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
+    <LinearLayout
+        android:id="@+id/completePanel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B31D150C"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <LinearLayout
-            android:id="@+id/completePanel"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#CC000000"
-            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_complete_sheet"
             android:orientation="vertical"
-            android:padding="24dp"
-            android:visibility="gone">
+            android:paddingStart="22dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="22dp"
+            android:paddingBottom="28dp">
+
+            <View
+                android:layout_width="44dp"
+                android:layout_height="5dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/bg_claim_handle" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="@string/capture_complete_title"
-                android:textColor="@color/card_white"
-                android:textSize="22sp"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvCompleteDuration"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="center"
-                android:textColor="@color/star_white"
-                android:textSize="16sp" />
+                android:layout_marginTop="6dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/btnUpload"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="32dp"
+                android:layout_height="54dp"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/bg_btn_primary"
                 android:gravity="center"
                 android:text="@string/capture_complete_upload"
-                android:textColor="@color/card_white"
-                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:textSize="17sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/btnRetake"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_btn_outline_on_dark"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_btn_ghost"
                 android:gravity="center"
                 android:text="@string/capture_complete_retake"
-                android:textColor="@color/card_white"
-                android:textSize="16sp"
+                android:textColor="@color/brand_primary_active"
+                android:textSize="15sp"
                 android:textStyle="bold" />
         </LinearLayout>
-    </FrameLayout>
-
-    <LinearLayout
-        android:id="@+id/bottomPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/space_black"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:paddingStart="20dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="24dp">
-
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/capture_demo_hint"
-            android:textColor="@color/star_white"
-            android:textSize="13sp" />
-
-        <TextView
-            android:id="@+id/btnRecord"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_btn_primary"
-            android:gravity="center"
-            android:text="@string/capture_demo_start"
-            android:textColor="@color/card_white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
     </LinearLayout>
-</LinearLayout>
+</FrameLayout>

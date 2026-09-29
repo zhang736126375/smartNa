@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Stream settings" android:textSize="20sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Choose streams and profiles. Applying restarts streaming." />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:text="Video" android:textStyle="bold" />
+        <Switch android:id="@+id/switch_video_decode" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Enable video decode and preview" />
+        <Switch android:id="@+id/switch_video_recording" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Enable MP4 video recording" />
+        <Switch android:id="@+id/switch_dynamic_bitrate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Enable dynamic color bitrate" />
+        <TextView android:id="@+id/tv_color_bitrate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Manual color bitrate" />
+        <SeekBar android:id="@+id/seekbar_color_bitrate" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" />
+        <Switch android:id="@+id/switch_left_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Left Color" />
+        <Spinner android:id="@+id/spinner_left_color" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <LinearLayout android:id="@+id/right_color_group" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+            <Switch android:id="@+id/switch_right_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Right Color" />
+            <Spinner android:id="@+id/spinner_right_color" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        </LinearLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:text="IMU" android:textStyle="bold" />
+        <Switch android:id="@+id/switch_accel" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Accelerometer" />
+        <Spinner android:id="@+id/spinner_accel" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <Switch android:id="@+id/switch_gyro" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Gyroscope" />
+        <Spinner android:id="@+id/spinner_gyro" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <TextView android:id="@+id/tv_stream_config_error" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textColor="#C62828" />
+        <Button android:id="@+id/btn_apply_stream_config" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Apply and start" />
+    </LinearLayout>
+</ScrollView>

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -13,6 +14,7 @@ import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.CollectorViewModels
 import com.bingo.smartna.collector.HallNavigator
 import com.bingo.smartna.collector.data.Prefs
+import com.bingo.smartna.collector.data.model.TaskStatus
 import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.collector.device.DeviceFragment
 import com.bingo.smartna.collector.hall.HallFragment
@@ -33,6 +35,9 @@ class MainActivity : BaseActivity<ActivityMainBinding, CollectorViewModel>(), Ha
         }
         currentTabId = savedInstanceState?.getInt(STATE_TAB_ID, 0) ?: 0
         super.onCreate(savedInstanceState)
+        if ((intent.flags and Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
+            overridePendingTransition(0, 0)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -53,7 +58,20 @@ class MainActivity : BaseActivity<ActivityMainBinding, CollectorViewModel>(), Ha
         applyRoleTabs()
 
         val launchTab = resolveLaunchTabId()
-        goToTab(launchTab, resetHall = launchTab == R.id.nav_hall)
+        // 冷启动时 HallFragment.initData 会自行 showHome，勿在此 resetToHome（viewModel 尚未就绪）
+        goToTab(launchTab, resetHall = false)
+    }
+
+    override fun initViewObservable() {
+        viewModel.ui.observe(this) { state ->
+            if (role == UserRole.LEAD) return@observe
+            val activeCount = state.userTasks.count { it.status != TaskStatus.DONE }
+            binding.labelTasks.text = if (activeCount > 0) {
+                getString(R.string.tab_tasks_badge, activeCount)
+            } else {
+                getString(R.string.tab_tasks)
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -85,8 +103,9 @@ class MainActivity : BaseActivity<ActivityMainBinding, CollectorViewModel>(), Ha
 
     private fun applyRoleTabs() {
         val lead = role == UserRole.LEAD
-        binding.tabTasks.visibility = if (lead) android.view.View.GONE else android.view.View.VISIBLE
-        binding.tabWallet.visibility = if (lead) android.view.View.GONE else android.view.View.VISIBLE
+        binding.tabTasks.visibility = if (lead) View.GONE else View.VISIBLE
+        binding.tabWallet.visibility = if (lead) View.GONE else View.VISIBLE
+        binding.tabDevice.visibility = if (lead) View.VISIBLE else View.GONE
         binding.labelDevice.setText(if (lead) R.string.tab_team_device else R.string.tab_device)
     }
 
@@ -116,7 +135,9 @@ class MainActivity : BaseActivity<ActivityMainBinding, CollectorViewModel>(), Ha
         val inactive = ContextCompat.getColor(this, R.color.text_gray)
         paintOne(binding.iconHall, binding.labelHall, selectedId == R.id.nav_hall, active, inactive)
         paintOne(binding.iconTasks, binding.labelTasks, selectedId == R.id.nav_tasks, active, inactive)
-        paintOne(binding.iconDevice, binding.labelDevice, selectedId == R.id.nav_device, active, inactive)
+        if (role == UserRole.LEAD) {
+            paintOne(binding.iconDevice, binding.labelDevice, selectedId == R.id.nav_device, active, inactive)
+        }
         paintOne(binding.iconWallet, binding.labelWallet, selectedId == R.id.nav_wallet, active, inactive)
         paintOne(binding.iconMine, binding.labelMine, selectedId == R.id.nav_mine, active, inactive)
     }
@@ -157,7 +178,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, CollectorViewModel>(), Ha
         }
         transaction.commitNow()
         if (resetHall) {
-            (target as? HallFragment)?.resetToHome()
+            (target as? HallFragment)?.view?.post { (target as? HallFragment)?.resetToHome() }
         }
     }
 
@@ -192,7 +213,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, CollectorViewModel>(), Ha
     private fun allTags() = if (role == UserRole.LEAD) {
         listOf(TAG_HALL, TAG_DEVICE, TAG_MINE)
     } else {
-        listOf(TAG_HALL, TAG_TASKS, TAG_DEVICE, TAG_WALLET, TAG_MINE)
+        listOf(TAG_HALL, TAG_TASKS, TAG_WALLET, TAG_MINE)
     }
 
     companion object {
@@ -204,7 +225,6 @@ class MainActivity : BaseActivity<ActivityMainBinding, CollectorViewModel>(), Ha
         private const val TAG_WALLET = "wallet"
         private const val TAG_MINE = "mine"
 
-        /** 登录 / 升级：清掉旧任务栈，新建 MainActivity。 */
         fun freshStart(context: Context, tabId: Int = R.id.nav_hall): Intent {
             MainTabCoordinator.clear()
             return Intent(context, MainActivity::class.java)

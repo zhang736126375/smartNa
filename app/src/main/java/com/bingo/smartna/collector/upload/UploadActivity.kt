@@ -15,8 +15,6 @@ import com.bingo.smartna.databinding.ActivityUploadBinding
 import com.blankj.utilcode.util.ClickUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 class UploadActivity : BaseActivity<ActivityUploadBinding, CollectorViewModel>() {
 
@@ -38,13 +36,24 @@ class UploadActivity : BaseActivity<ActivityUploadBinding, CollectorViewModel>()
     }
 
     override fun initData() {
-        val taskTitle = intent.getStringExtra(EXTRA_TASK_TITLE).orEmpty()
-        binding.tvTaskTitle.text = taskTitle
         binding.tvClipInfo.text = getString(R.string.upload_clip_info, clipIndex)
-        binding.tvDuration.text = getString(R.string.upload_clip_duration, formatDuration(durationMs))
-        binding.tvStatus.setText(R.string.upload_ready)
+        val sizeMb = ((durationMs / 1000L) * 7L).coerceIn(80L, 420L).toInt()
+        binding.tvDuration.text = getString(R.string.upload_clip_size, sizeMb)
+        val reward = viewModel.ui.value?.userTaskFor(taskId)?.task?.reward
+            ?: MockDataSource.allTasks.find { it.id == taskId }?.reward
+            ?: 0.0
+        binding.tvEarnPreview.text = getString(R.string.upload_earn_preview, reward)
+        val canQueue = viewModel.ui.value?.userTaskFor(taskId)?.canCaptureMoreDemo() == true
+        if (canQueue) {
+            binding.nextCard.visibility = View.VISIBLE
+            binding.tvNextQueue.text = getString(R.string.upload_next_queue, clipIndex + 1)
+        } else {
+            binding.nextCard.visibility = View.GONE
+        }
+        binding.tvUploadTitle.setText(R.string.upload_title)
+        binding.tvStatus.text = getString(R.string.upload_progress, 0)
         binding.progressBar.progress = 0
-        binding.btnStartUpload.visibility = View.VISIBLE
+        binding.btnStartUpload.visibility = View.GONE
         binding.btnContinueCapture.visibility = View.GONE
         binding.btnToTasks.visibility = View.GONE
         ClickUtils.applySingleDebouncing(binding.btnToTasks) {
@@ -62,36 +71,29 @@ class UploadActivity : BaseActivity<ActivityUploadBinding, CollectorViewModel>()
         ClickUtils.applySingleDebouncing(binding.btnStartUpload) {
             if (!uploading) startFakeUpload()
         }
+        startFakeUpload()
     }
 
     private fun startFakeUpload() {
+        if (uploading) return
         uploading = true
-        binding.btnStartUpload.isEnabled = false
         binding.btnStartUpload.visibility = View.GONE
+        binding.tvUploadTitle.setText(R.string.upload_title)
         lifecycleScope.launch {
-            for (progress in 1..100 step 5) {
+            for (progress in 0..100 step 2) {
                 binding.progressBar.progress = progress
                 binding.tvStatus.text = getString(R.string.upload_progress, progress)
-                delay(80)
+                delay(40)
             }
             viewModel.completeUpload(clipId)
-            binding.tvStatus.setText(R.string.upload_success)
+            binding.tvUploadTitle.setText(R.string.upload_title_done)
+            binding.tvStatus.text = getString(R.string.upload_progress, 100)
             val userTask = viewModel.ui.value?.userTaskFor(taskId)
             val canCaptureMore = userTask?.canCaptureMoreDemo() == true
+            binding.nextCard.visibility = View.GONE
             binding.btnContinueCapture.visibility = if (canCaptureMore) View.VISIBLE else View.GONE
             binding.btnToTasks.visibility = View.VISIBLE
             uploading = false
-        }
-    }
-
-    private fun formatDuration(durationMs: Long): String {
-        val totalSeconds = TimeUnit.MILLISECONDS.toSeconds(durationMs.coerceAtLeast(0L))
-        val minutes = totalSeconds / 60
-        val seconds = totalSeconds % 60
-        return if (minutes > 0) {
-            String.format(Locale.getDefault(), "%d分%02d秒", minutes, seconds)
-        } else {
-            String.format(Locale.getDefault(), "%d秒", seconds)
         }
     }
 

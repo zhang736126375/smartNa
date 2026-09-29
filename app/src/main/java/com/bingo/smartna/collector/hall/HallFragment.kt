@@ -7,6 +7,7 @@ import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseFragment
 import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.data.model.HallCategory
+import androidx.fragment.app.Fragment
 import com.bingo.smartna.databinding.FragmentHallBinding
 
 class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), HallCategoryNavigator {
@@ -39,7 +40,7 @@ class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), Ha
         viewModel.ui.observe(viewLifecycleOwner) {
             if (childFragmentManager.backStackEntryCount > 0) return@observe
             val current = childFragmentManager.findFragmentById(R.id.hallContainer) ?: return@observe
-            if (current !is HallCategoryFragment) {
+            if (current !is GraspHallFragment) {
                 showHome(replace = true)
             }
         }
@@ -83,18 +84,21 @@ class HallFragment : BaseFragment<FragmentHallBinding, CollectorViewModel>(), Ha
     }
 
     private fun showHome(replace: Boolean) {
+        val homeFragment = homeFragmentForRole()
         if (!replace) {
             childFragmentManager.beginTransaction()
-                .replace(R.id.hallContainer, HallCategoryFragment())
+                .replace(R.id.hallContainer, homeFragment)
                 .commit()
             return
         }
         val current = childFragmentManager.findFragmentById(R.id.hallContainer)
-        if (current is HallCategoryFragment) return
+        if (current != null && current::class == homeFragment::class) return
         childFragmentManager.beginTransaction()
-            .replace(R.id.hallContainer, HallCategoryFragment())
+            .replace(R.id.hallContainer, homeFragment)
             .commit()
     }
+
+    private fun homeFragmentForRole(): Fragment = GraspHallFragment()
 
     private companion object {
         const val TAG_LIST = "hall_list"

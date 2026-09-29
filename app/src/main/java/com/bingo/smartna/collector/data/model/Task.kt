@@ -70,13 +70,20 @@ data class Task(
     val doneClips: Int,
     val deadline: String,
     val priority: TaskPriority,
-    val durationMax: Int = 90
+    val durationMax: Int = 90,
+    val claimedCount: Int = 0,
+    val coverRes: Int = R.drawable.bg_cover_warm
 ) {
     val sceneGroupName: String
-        get() = scene.substringBefore("-").ifBlank { scene }
+        get() = sceneParts.firstOrNull().orEmpty().ifBlank { scene }
 
     val sceneChildName: String
-        get() = scene.substringAfter("-", "")
+        get() = sceneParts.getOrNull(1).orEmpty()
+
+    private val sceneParts: List<String>
+        get() = scene.split(" · ", "-", "｜", "|", "·")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
 }
 
 /** 用户领取后的任务状态：进行中 → 审核中 → 已完成 */

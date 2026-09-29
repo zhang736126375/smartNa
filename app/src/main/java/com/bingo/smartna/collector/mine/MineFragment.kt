@@ -12,6 +12,8 @@ import com.bingo.smartna.base.ui.BaseFragment
 import com.bingo.smartna.collector.CollectorUiState
 import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.data.model.UserRole
+import com.bingo.smartna.MainActivity
+import com.bingo.smartna.collector.device.DevicePageActivity
 import com.bingo.smartna.collector.login.LoginActivity
 import com.bingo.smartna.collector.login.LoginViewModel
 import com.bingo.smartna.databinding.DialogApplyUpgradeBinding
@@ -36,13 +38,14 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
     }
 
     override fun initData() {
+        bindGraspProfile()
         bindSettings(getString(R.string.mine_storage_computing))
         val appContext = requireContext().applicationContext
         viewLifecycleOwner.lifecycleScope.launch {
             val text = withContext(Dispatchers.IO) { computeStorage(appContext) }
             if (view != null) bindSettings(text)
         }
-        ClickUtils.applySingleDebouncing(binding.btnVerify) { showDevToast() }
+        ClickUtils.applySingleDebouncing(binding.tvVerified) { showDevToast() }
         ClickUtils.applySingleDebouncing(binding.btnLogout) { viewModel.logout() }
         ClickUtils.applySingleDebouncing(binding.upgradeHeader) { toggleUpgradeSection() }
         updateUpgradeExpandedUi()
@@ -68,6 +71,13 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
         viewModel.ui.observe(viewLifecycleOwner) { state ->
             binding.tvPhone.text = state.profileTitle
             binding.tvAvatar.text = state.avatarLetter.ifBlank { getString(R.string.mine_avatar_fallback) }
+            binding.tvStatFrames.text = String.format(
+                Locale.CHINA,
+                "%,d",
+                state.userTasks.sumOf { it.doneClips } * 240
+            )
+            binding.tvStatMoney.text = getString(R.string.wallet_balance, state.walletBalance)
+            binding.tvStatStreak.text = getString(R.string.mine_streak_days, 6)
             renderRole(state)
         }
         viewModel.upgraded.observe(viewLifecycleOwner) { target ->
@@ -97,14 +107,17 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
     }
 
     private fun renderRole(state: CollectorUiState) {
-        val roleRes = when (state.role) {
-            UserRole.CROWD -> R.string.mine_role_crowd
-            UserRole.STAFF -> R.string.mine_role_staff
-            UserRole.LEAD -> R.string.mine_role_lead
+        if (state.role == UserRole.CROWD) {
+            binding.tvRole.text = getString(R.string.mine_master_level)
+        } else {
+            val roleRes = when (state.role) {
+                UserRole.STAFF -> R.string.mine_role_staff
+                UserRole.LEAD -> R.string.mine_role_lead
+                else -> R.string.mine_role_crowd
+            }
+            binding.tvRole.setText(roleRes)
         }
-        binding.tvRole.setText(roleRes)
-        val showVerify = state.role != UserRole.LEAD
-        binding.verifyWrap.visibility = if (showVerify) View.VISIBLE else View.GONE
+        binding.tvVerified.visibility = if (state.role == UserRole.LEAD) View.GONE else View.VISIBLE
         binding.upgradeSection.visibility = if (state.role == UserRole.CROWD) View.VISIBLE else View.GONE
         if (state.role != UserRole.CROWD) {
             upgradeExpanded = false
@@ -150,6 +163,23 @@ class MineFragment : BaseFragment<FragmentMineBinding, CollectorViewModel>() {
             }
         }
         dialog.show()
+    }
+
+    private fun bindGraspProfile() {
+        binding.tvRole.text = getString(R.string.mine_master_level)
+        ClickUtils.applySingleDebouncing(binding.rowMyTasks) {
+            startActivity(MainActivity.intentForTab(requireContext(), R.id.nav_tasks))
+        }
+        ClickUtils.applySingleDebouncing(binding.rowMyDevice) {
+            DevicePageActivity.start(requireContext())
+        }
+        ClickUtils.applySingleDebouncing(binding.rowBank) {
+            showDevToast()
+        }
+        ClickUtils.applySingleDebouncing(binding.rowSettings) {
+            binding.settingCard.visibility =
+                if (binding.settingCard.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        }
     }
 
     private fun bindSettings(storageText: String) {

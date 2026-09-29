@@ -27,6 +27,22 @@ android {
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
+        externalNativeBuild {
+            cmake {
+                arguments += listOf(
+                    "-DANDROID_STL=c++_shared",
+                    "-DANDROID_ARM_NEON=TRUE"
+                )
+                cppFlags += "-std=c++11"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     signingConfigs {
@@ -65,7 +81,13 @@ android {
     packaging {
         jniLibs {
             // app/jniLibs 中放置 Orbbec AAR 自带的 libc++_shared，避免 coresdk 版本导致符号缺失
-            pickFirsts += setOf("**/libc++_shared.so", "**/libOrbbecSDK.so", "**/libobsensor_jni.so")
+            pickFirsts += setOf(
+                "**/libc++_shared.so",
+                "**/libOrbbecSDK.so",
+                "**/libobsensor_jni.so",
+                "**/libomp.so",
+                "**/liborbbecsdkexamples.so"
+            )
         }
     }
 }

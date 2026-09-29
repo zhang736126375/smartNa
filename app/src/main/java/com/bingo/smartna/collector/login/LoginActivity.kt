@@ -1,7 +1,9 @@
 package com.bingo.smartna.collector.login
 
+import android.content.Intent
 import android.graphics.LinearGradient
 import android.graphics.Shader
+import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -11,28 +13,41 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.bingo.smartna.MainActivity
+import com.bingo.smartna.MainTabCoordinator
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseActivity
+import com.bingo.smartna.collector.data.Prefs
 import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.databinding.ActivityLoginBinding
-import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ClickUtils
 
 class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
 
-    private var agreed = false
+    private var agreed = true
     private var enterpriseMode = false
     private var enterpriseRole = UserRole.STAFF
+    private var redirectToMain = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        val prefs = Prefs(this)
+        redirectToMain = prefs.isLoggedIn
+        if (redirectToMain) {
+            setTheme(
+                if (prefs.role == UserRole.STAFF) R.style.Theme_SmartNa_Launch_Staff
+                else R.style.Theme_SmartNa_Launch
+            )
+        }
+        super.onCreate(savedInstanceState)
+    }
 
     override fun inflateBinding() = ActivityLoginBinding.inflate(layoutInflater)
 
     override fun initData() {
-        if (viewModel.alreadyLoggedIn) {
+        if (redirectToMain) {
+            binding.root.visibility = View.INVISIBLE
             openMain()
             return
         }
-        applySloganGradient()
-        bindAgreeText()
         renderMode()
         refreshLoginEnabled()
     }
@@ -124,7 +139,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
     private fun renderMode() {
         binding.phonePanel.visibility = if (enterpriseMode) View.GONE else View.VISIBLE
         binding.accountPanel.visibility = if (enterpriseMode) View.VISIBLE else View.GONE
-        binding.tvLoginSubtitle.visibility = if (enterpriseMode) View.GONE else View.VISIBLE
         binding.tvLoginTitle.setText(
             if (enterpriseMode) R.string.login_enterprise_title else R.string.login_title
         )
@@ -165,8 +179,13 @@ class LoginActivity : BaseActivity<ActivityLoginBinding, LoginViewModel>() {
     }
 
     private fun openMain() {
-        startActivity(MainActivity.freshStart(this))
+        MainTabCoordinator.clear()
+        val intent = Intent(this, MainActivity::class.java)
+            .putExtra(MainActivity.EXTRA_TAB_ID, R.id.nav_hall)
+            .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        startActivity(intent)
         finish()
+        overridePendingTransition(0, 0)
     }
 
     private fun phone() = binding.etPhone.text?.toString().orEmpty()

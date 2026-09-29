@@ -22,11 +22,42 @@
         <item name="colorSecondaryVariant">@color/staff_primary_dark</item>
     </style>
 
-    <style name="Theme.SmartNa.Login" parent="Theme.SmartNa">
-        <item name="android:statusBarColor">@color/space_black</item>
+    <style name="Theme.SmartNa.Launch" parent="Theme.SmartNa">
+        <item name="android:windowAnimationStyle">@style/Animation.SmartNa.Instant</item>
+    </style>
+
+    <style name="Theme.SmartNa.Launch.Staff" parent="Theme.SmartNa.Staff">
+        <item name="android:windowAnimationStyle">@style/Animation.SmartNa.Instant</item>
+    </style>
+
+    <style name="Theme.SmartNa.Capture" parent="Theme.SmartNa">
+        <item name="android:statusBarColor">@color/capture_hud</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowBackground">@color/space_black</item>
+        <item name="android:windowBackground">@color/capture_hud</item>
+        <item name="android:navigationBarColor">@color/capture_hud</item>
+    </style>
+
+    <style name="Theme.SmartNa.Login" parent="Theme.SmartNa">
+        <item name="android:statusBarColor">@color/brand_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/brand_primary</item>
         <item name="android:navigationBarColor">@color/card_white</item>
+        <item name="android:windowAnimationStyle">@style/Animation.SmartNa.Instant</item>
+    </style>
+
+    <style name="Animation.SmartNa.Instant" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/instant</item>
+        <item name="android:activityOpenExitAnimation">@anim/instant</item>
+        <item name="android:activityCloseEnterAnimation">@anim/instant</item>
+        <item name="android:activityCloseExitAnimation">@anim/instant</item>
+        <item name="android:taskOpenEnterAnimation">@anim/instant</item>
+        <item name="android:taskOpenExitAnimation">@anim/instant</item>
+        <item name="android:taskCloseEnterAnimation">@anim/instant</item>
+        <item name="android:taskCloseExitAnimation">@anim/instant</item>
+        <item name="android:taskToFrontEnterAnimation">@anim/instant</item>
+        <item name="android:taskToFrontExitAnimation">@anim/instant</item>
+        <item name="android:taskToBackEnterAnimation">@anim/instant</item>
+        <item name="android:taskToBackExitAnimation">@anim/instant</item>
     </style>
 
     <style name="MainTabItem">
@@ -50,6 +81,22 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="Widget.SmartNa.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/card_white</item>
+        <item name="cardCornerRadius">18dp</item>
+        <item name="cardElevation">3dp</item>
+        <item name="cardUseCompatPadding">true</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="cardPreventCornerOverlap">false</item>
+        <item name="rippleColor">@android:color/transparent</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+    </style>
+
+    <style name="Widget.SmartNa.Card.Float" parent="Widget.SmartNa.Card">
+        <item name="cardElevation">6dp</item>
     </style>
 
     <style name="Widget.SmartNa.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView">

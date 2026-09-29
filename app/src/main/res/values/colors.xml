@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Brand · 琥珀金 -->
-    <color name="brand_primary">#D97706</color>
-    <color name="brand_primary_hover">#F59E0B</color>
-    <color name="brand_primary_active">#B45309</color>
-    <color name="brand_soft">#FEF3C7</color>
+    <!-- Brand · 抓贝暖橙金 v5.6 -->
+    <color name="brand_primary">#F58220</color>
+    <color name="brand_primary_hover">#FF9E2E</color>
+    <color name="brand_primary_active">#C05A00</color>
+    <color name="brand_soft">#FFF0DB</color>
+    <color name="brand_gold">#FFC03D</color>
+    <color name="money_green">#16A34A</color>
+    <color name="money_green_deep">#0E7A38</color>
+    <color name="money_green_soft">#EAF7EF</color>
+    <color name="gold_soft">#FFF4D6</color>
+    <color name="hair_line">#FBF2E2</color>
+    <color name="empty_frame_start">#FCEDE0</color>
+    <color name="empty_frame_end">#FCF1DC</color>
+    <color name="pipeline_dash">#EADFCF</color>
+    <color name="ring_track">#F5EFE5</color>
+    <color name="ink_warm">#26180A</color>
+    <color name="capture_hud">#1D150C</color>
+    <color name="hud_ok">#6EE7A0</color>
+    <color name="hud_gold">#F7C469</color>
+    <color name="hud_muted">#C9B79E</color>
+    <color name="rec_red">#F87171</color>
+    <color name="rec_red_bg">#33EF4444</color>
 
     <!-- Legacy aliases → amber tokens -->
     <color name="brand_orange">@color/brand_primary</color>
@@ -26,19 +43,19 @@
     <color name="staff_primary_dark">#172554</color>
 
     <!-- Functional -->
-    <color name="price_emphasis">#92400E</color>
+    <color name="price_emphasis">#16A34A</color>
     <color name="error">#DC2626</color>
     <color name="success">#16A34A</color>
     <color name="info">#2563EB</color>
 
     <!-- Neutral -->
-    <color name="text_primary">#1C1917</color>
-    <color name="text_secondary">#57534E</color>
-    <color name="text_tertiary">#A8A29E</color>
-    <color name="bg_page">#FFFBEB</color>
+    <color name="text_primary">#26180A</color>
+    <color name="text_secondary">#7A6A55</color>
+    <color name="text_tertiary">#B3A48E</color>
+    <color name="bg_page">#FFF9EE</color>
     <color name="surface_card">#FFFFFF</color>
     <color name="surface_muted">#F5F5F4</color>
-    <color name="border_default">#E7E5E4</color>
+    <color name="border_default">#F6E7D0</color>
 
     <!-- Legacy neutral aliases -->
     <color name="bg_gray">@color/bg_page</color>
@@ -86,6 +103,8 @@
     <color name="chevron_gray">@color/text_tertiary</color>
     <color name="input_divider">@color/border_default</color>
     <color name="agree_border">@color/border_default</color>
+    <color name="gold_text">#A87000</color>
+    <color name="scarce_text">#D85A30</color>
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="white_28">#47FFFFFF</color>

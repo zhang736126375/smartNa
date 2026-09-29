@@ -110,7 +110,7 @@ class ScanDeviceActivity : BaseActivity<ActivityScanDeviceBinding, BaseViewModel
         handled = true
         Prefs(this).saveConnectedDevice(kit.id, value)
         setResult(RESULT_OK)
-        startActivity(MainActivity.intentForTab(this, R.id.nav_device))
+        DevicePageActivity.start(this)
         finish()
     }
 

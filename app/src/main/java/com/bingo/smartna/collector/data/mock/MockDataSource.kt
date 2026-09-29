@@ -15,12 +15,12 @@ object MockDataSource {
     private val seedTasks: List<Task> = listOf(
         Task(
             id = "t_demo",
-            title = "【Demo】家政收纳整理 Ego 采集",
+            title = "家政收纳整理 Ego 采集",
             scene = "生活服务场景-家政",
             device = "MEgo",
             settle = "按有效采集时长结算",
             duration = "30~90分钟",
-            quotaTotal = 999,
+            quotaTotal = 3,
             reward = 14.0,
             category = HallCategory.LIFE,
             kind = TaskKind.CUSTOM,
@@ -28,11 +28,12 @@ object MockDataSource {
             doneClips = 0,
             deadline = "12.31",
             priority = TaskPriority.HIGH,
-            durationMax = 90
+            durationMax = 90,
+            claimedCount = 47
         ),
         Task(
             id = "t1",
-            title = "住宅小区 | 收纳整理定制采集",
+            title = "住宅小区｜收纳整理定制采集",
             scene = "居住场景-住宅小区",
             device = "MEgo",
             settle = "按有效采集时长结算",
@@ -45,7 +46,8 @@ object MockDataSource {
             doneClips = 0,
             deadline = "9.30",
             priority = TaskPriority.HIGH,
-            durationMax = 90
+            durationMax = 90,
+            claimedCount = 23
         ),
         Task(
             id = "t2",

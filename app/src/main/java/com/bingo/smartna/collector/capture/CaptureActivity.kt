@@ -6,18 +6,17 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.video.FileOutputOptions
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
 import androidx.camera.video.Recorder
 import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
-import androidx.camera.video.VideoRecordEvent
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bingo.smartna.R
@@ -33,7 +32,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -49,6 +47,8 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
 
     private var capturePhase = CapturePhase.PREVIEW
     private var recordStartElapsed = 0L
+    private var pausedAccumulated = 0L
+    private var paused = false
     private var lastDurationMs = 0L
     private var timerJob: Job? = null
     private var pendingClip: ClipRecord? = null
@@ -82,16 +82,14 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
             doneClips = userTask.doneClips
             targetClips = userTask.demoTargetClips()
         }
-        binding.tvTitle.text = taskTitle.ifBlank { getString(R.string.capture_title) }
-        updateProgressText()
         ClickUtils.applySingleDebouncing(binding.btnBack) { onBackPressedInternal() }
         ClickUtils.applySingleDebouncing(binding.btnRecord) { onRecordButtonClick() }
+        ClickUtils.applySingleDebouncing(binding.btnPause) { togglePause() }
         ClickUtils.applySingleDebouncing(binding.btnUpload) { onUploadClick() }
         ClickUtils.applySingleDebouncing(binding.btnRetake) { onRetakeClick() }
         if (demoMode) {
             binding.demoPanel.visibility = View.VISIBLE
             binding.previewView.visibility = View.GONE
-            renderPreviewPhase()
         } else {
             binding.demoPanel.visibility = View.GONE
             binding.previewView.visibility = View.VISIBLE
@@ -101,6 +99,7 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
                 permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO))
             }
         }
+        renderPreviewPhase()
     }
 
     override fun onDestroy() {
@@ -128,26 +127,43 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
 
     private fun startRecording() {
         capturePhase = CapturePhase.RECORDING
+        paused = false
+        pausedAccumulated = 0L
         recordStartElapsed = SystemClock.elapsedRealtime()
         pendingClip = null
-        binding.tvDeviceStatus.setText(R.string.capture_device_status_recording)
-        binding.tvRecTimer.visibility = View.VISIBLE
-        binding.tvRecTimer.text = getString(R.string.capture_rec_timer, formatDuration(0L))
-        binding.btnRecord.setText(R.string.capture_finish)
-        binding.tvStatus.setText(R.string.capture_recording)
+        renderHud(elapsedMs = 0L)
         timerJob?.cancel()
         timerJob = lifecycleScope.launch {
             while (isActive && capturePhase == CapturePhase.RECORDING) {
-                val elapsed = SystemClock.elapsedRealtime() - recordStartElapsed
-                binding.tvRecTimer.text = getString(R.string.capture_rec_timer, formatDuration(elapsed))
-                delay(500)
+                renderHud(currentElapsed())
+                delay(200)
             }
+        }
+    }
+
+    private fun togglePause() {
+        if (capturePhase != CapturePhase.RECORDING) return
+        if (paused) {
+            recordStartElapsed = SystemClock.elapsedRealtime()
+            paused = false
+        } else {
+            pausedAccumulated = currentElapsed()
+            paused = true
+        }
+        renderHud(currentElapsed())
+    }
+
+    private fun currentElapsed(): Long {
+        return if (paused) {
+            pausedAccumulated
+        } else {
+            pausedAccumulated + (SystemClock.elapsedRealtime() - recordStartElapsed)
         }
     }
 
     private fun finishRecording() {
         timerJob?.cancel()
-        lastDurationMs = (SystemClock.elapsedRealtime() - recordStartElapsed).coerceAtLeast(1000L)
+        lastDurationMs = currentElapsed().coerceAtLeast(1000L)
         val clip = viewModel.recordDemoClip(taskId, lastDurationMs)
         if (clip == null) {
             Toast.makeText(this, R.string.capture_demo_failed, Toast.LENGTH_SHORT).show()
@@ -156,7 +172,6 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
         }
         pendingClip = clip
         doneClips = clip.clipIndex
-        updateProgressText()
         showCompletePhase(clip)
     }
 
@@ -164,11 +179,11 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
         capturePhase = CapturePhase.COMPLETE
         binding.completePanel.visibility = View.VISIBLE
         binding.bottomPanel.visibility = View.GONE
-        binding.tvRecTimer.visibility = View.GONE
         binding.tvCompleteDuration.text = getString(
             R.string.capture_complete_duration,
-            formatDuration(clip.durationMs)
+            formatSpokenDuration(clip.durationMs)
         )
+        renderHud(clip.durationMs)
     }
 
     private fun onUploadClick() {
@@ -192,46 +207,107 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
                 doneClips = userTask.doneClips
                 targetClips = userTask.demoTargetClips()
             }
-            updateProgressText()
         }
         renderPreviewPhase()
     }
 
     private fun renderPreviewPhase() {
         capturePhase = CapturePhase.PREVIEW
+        paused = false
         timerJob?.cancel()
         binding.completePanel.visibility = View.GONE
         binding.bottomPanel.visibility = View.VISIBLE
-        binding.tvRecTimer.visibility = View.GONE
-        binding.tvDeviceStatus.setText(R.string.capture_device_status_ready)
-        binding.btnRecord.isEnabled = true
-        binding.btnRecord.setText(R.string.capture_demo_start)
-        binding.tvStatus.setText(R.string.capture_demo_hint)
+        renderHud(0L)
     }
 
-    private fun updateProgressText() {
-        val target = if (targetClips > 0) targetClips else 1
-        binding.tvProgress.text = getString(R.string.capture_progress, doneClips, target)
+    private fun renderHud(elapsedMs: Long) {
+        val clipNo = (doneClips + if (capturePhase == CapturePhase.COMPLETE) 0 else 1).coerceAtLeast(1)
+        val shortTitle = taskTitle.replace("【Demo】", "").ifBlank { getString(R.string.capture_title) }
+        binding.tvTitle.text = getString(R.string.capture_task_chip, shortTitle, clipNo)
+        val frames = (elapsedMs / 250L).toInt().coerceAtLeast(if (capturePhase == CapturePhase.PREVIEW) 0 else 1)
+        binding.tvProgress.text = getString(R.string.capture_frames, frames)
+        binding.tvRecTimer.text = formatClock(elapsedMs)
+
+        val recording = capturePhase == CapturePhase.RECORDING
+        binding.btnPause.visibility = if (recording) View.VISIBLE else View.GONE
+        (binding.btnRecord.layoutParams as LinearLayout.LayoutParams).marginStart =
+            if (recording) dp(12) else 0
+        binding.btnRecord.requestLayout()
+
+        when {
+            capturePhase == CapturePhase.PREVIEW -> {
+                binding.recChip.setBackgroundResource(R.drawable.bg_hchip)
+                binding.recDot.visibility = View.GONE
+                binding.tvRecLabel.setText(R.string.capture_ready)
+                binding.tvRecLabel.setTextColor(ContextCompat.getColor(this, R.color.hud_gold))
+                binding.btnRecord.setText(R.string.capture_demo_start)
+                binding.tvStatus.setText(R.string.capture_demo_hint)
+            }
+            recording && paused -> {
+                binding.recChip.setBackgroundResource(R.drawable.bg_hchip)
+                binding.recDot.visibility = View.VISIBLE
+                binding.tvRecLabel.setText(R.string.capture_paused)
+                binding.tvRecLabel.setTextColor(ContextCompat.getColor(this, R.color.hud_gold))
+                binding.btnPause.setText(R.string.capture_resume)
+                binding.btnRecord.setText(R.string.capture_finish)
+                binding.tvStatus.setText(R.string.capture_paused)
+            }
+            recording -> {
+                binding.recChip.setBackgroundResource(R.drawable.bg_hchip_rec)
+                binding.recDot.visibility = View.VISIBLE
+                binding.tvRecLabel.setText(R.string.capture_recording)
+                binding.tvRecLabel.setTextColor(ContextCompat.getColor(this, R.color.rec_red))
+                binding.btnPause.setText(R.string.capture_pause)
+                binding.btnRecord.setText(R.string.capture_finish)
+                binding.tvStatus.setText(R.string.capture_demo_hint)
+            }
+            else -> {
+                binding.recChip.setBackgroundResource(R.drawable.bg_hchip)
+                binding.recDot.visibility = View.GONE
+                binding.tvRecLabel.setText(R.string.capture_finish)
+                binding.tvRecLabel.setTextColor(ContextCompat.getColor(this, R.color.hud_ok))
+            }
+        }
+        renderSegments(recording)
     }
 
-    private fun formatDuration(durationMs: Long): String {
+    private fun renderSegments(recording: Boolean) {
+        binding.segmentRow.removeAllViews()
+        val target = targetClips.coerceAtLeast(1)
+        repeat(target) { index ->
+            val bar = View(this)
+            val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+            if (index > 0) lp.marginStart = dp(4)
+            bar.layoutParams = lp
+            val filled = index < doneClips || (recording && index == doneClips) ||
+                (capturePhase == CapturePhase.COMPLETE && index == doneClips - 1)
+            bar.setBackgroundResource(if (filled) R.drawable.bg_segment_on else R.drawable.bg_segment_off)
+            binding.segmentRow.addView(bar)
+        }
+    }
+
+    private fun formatClock(durationMs: Long): String {
+        val totalSeconds = TimeUnit.MILLISECONDS.toSeconds(durationMs.coerceAtLeast(0L))
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format(Locale.US, "%02d:%02d", minutes, seconds)
+    }
+
+    private fun formatSpokenDuration(durationMs: Long): String {
         val totalSeconds = TimeUnit.MILLISECONDS.toSeconds(durationMs)
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
         return if (minutes > 0) {
-            String.format(Locale.getDefault(), "%d分%02d秒", minutes, seconds)
+            String.format(Locale.CHINA, "%d分%02d秒", minutes, seconds)
         } else {
-            String.format(Locale.getDefault(), "%d秒", seconds)
+            String.format(Locale.CHINA, "%d秒", seconds)
         }
     }
 
+    private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
+
     private fun hasCameraPermission(): Boolean {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
-            PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun hasAudioPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
     }
 
@@ -250,7 +326,6 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
             provider.unbindAll()
             provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, capture)
             videoCapture = capture
-            binding.tvStatus.setText(R.string.capture_hint)
         }, ContextCompat.getMainExecutor(this))
     }
 

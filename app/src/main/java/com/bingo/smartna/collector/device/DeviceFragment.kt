@@ -11,10 +11,14 @@ import com.bingo.smartna.base.ui.BaseFragment
 import com.bingo.smartna.base.ui.BaseViewModel
 import com.bingo.smartna.collector.data.Prefs
 import com.bingo.smartna.collector.data.model.UserRole
+import com.bingo.smartna.collector.device.ego.EgoNetDeviceFoundActivity
 import com.bingo.smartna.databinding.FragmentDeviceBinding
 import com.blankj.utilcode.util.ClickUtils
 
 class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
+
+    private var moreClickCount = 0
+    private var moreClickWindowStart = 0L
 
     private val connectLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -29,15 +33,12 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
 
     override fun initData() {
         val lead = Prefs(requireContext()).role == UserRole.LEAD
-        binding.tvTitle.setText(if (lead) R.string.tab_team_device else R.string.tab_device)
+        binding.tvTitle.setText(if (lead) R.string.tab_team_device else R.string.mine_menu_device)
         binding.emptyView.bind(getString(R.string.device_empty))
-        val toast = {
-            Toast.makeText(requireContext(), R.string.demo_dev_toast, Toast.LENGTH_SHORT).show()
-        }
         ClickUtils.applySingleDebouncing(binding.btnApply) {
             applyLauncher.launch(Intent(requireContext(), DeviceApplyEntryActivity::class.java))
         }
-        ClickUtils.applySingleDebouncing(binding.btnMore) { toast() }
+        binding.btnMore.setOnClickListener { onMoreClicked() }
         ClickUtils.applySingleDebouncing(binding.btnConnect) {
             connectLauncher.launch(Intent(requireContext(), ConnectKitActivity::class.java))
         }
@@ -57,6 +58,19 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
     override fun onResume() {
         super.onResume()
         if (view != null) renderState()
+    }
+
+    private fun onMoreClicked() {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - moreClickWindowStart > 1000L) {
+            moreClickCount = 0
+            moreClickWindowStart = now
+        }
+        moreClickCount += 1
+        if (moreClickCount >= 3) {
+            moreClickCount = 0
+            startActivity(Intent(requireContext(), EgoNetDeviceFoundActivity::class.java))
+        }
     }
 
     private fun openApplyProgress() {

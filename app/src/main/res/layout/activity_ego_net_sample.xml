@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context=".activity.EgoSampleNetActivity">
+
+    <!-- Top row: network connect input -->
+    <LinearLayout
+        android:id="@+id/ego_net_connect_panel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:background="#202020"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <EditText
+            android:id="@+id/ego_net_ip_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="IP"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#AAAAAA"
+            android:backgroundTint="#FFFFFF"
+            android:singleLine="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text=":"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/ego_net_port_input"
+            android:layout_width="64dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:hint="8090"
+            android:inputType="number"
+            android:text="8090"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#AAAAAA"
+            android:backgroundTint="#FFFFFF"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/btn_open_net_device"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="打开" />
+    </LinearLayout>
+
+    <!-- Color stream panels (65% height).
+         QUAD uses a 2x2 grid: SIDE_LEFT / LEFT above RIGHT / SIDE_RIGHT.
+         MONO:   only left panel visible.
+         STEREO: left + ego_color_divider + right visible; side panels gone.
+         QUAD:   all four panels + all three dividers visible. -->
+    <FrameLayout
+        android:id="@+id/ego_stream_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/ego_divider_h"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ego_net_connect_panel"
+        app:layout_constraintVertical_weight="65">
+
+        <!-- SIDE_LEFT — only visible in QUAD mode -->
+        <FrameLayout
+            android:id="@+id/ego_side_left_color_panel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <TextureView
+                android:id="@+id/ego_side_left_color"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <com.bingo.smartna.collector.device.ego.view.OBGLView
+                android:id="@+id/ego_side_left_color_raw"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/ego_side_left_color_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|top"
+                android:layout_margin="4dp"
+                android:background="#80000000"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="Side Left"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+        </FrameLayout>
+
+        <!-- Divider between SIDE_LEFT and LEFT — only visible in QUAD mode -->
+        <View
+            android:id="@+id/ego_side_left_divider"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#666666"
+            android:visibility="gone" />
+
+        <!-- LEFT (also used as the single COLOR panel in MONO mode) -->
+        <FrameLayout
+            android:id="@+id/ego_left_color_panel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextureView
+                android:id="@+id/ego_left_color"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <com.bingo.smartna.collector.device.ego.view.OBGLView
+                android:id="@+id/ego_left_color_raw"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/ego_left_color_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|top"
+                android:layout_margin="4dp"
+                android:background="#80000000"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="Left Color"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+        </FrameLayout>
+
+        <!-- Divider between LEFT and RIGHT — visible in STEREO and QUAD modes -->
+        <View
+            android:id="@+id/ego_color_divider"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#666666" />
+
+        <!-- RIGHT — visible in STEREO and QUAD modes -->
+        <FrameLayout
+            android:id="@+id/ego_right_color_panel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextureView
+                android:id="@+id/ego_right_color"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <com.bingo.smartna.collector.device.ego.view.OBGLView
+                android:id="@+id/ego_right_color_raw"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/ego_right_color_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|top"
+                android:layout_margin="4dp"
+                android:background="#80000000"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="Right Color"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+        </FrameLayout>
+
+        <!-- Divider between RIGHT and SIDE_RIGHT — only visible in QUAD mode -->
+        <View
+            android:id="@+id/ego_side_right_divider"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#666666"
+            android:visibility="gone" />
+
+        <!-- SIDE_RIGHT — only visible in QUAD mode -->
+        <FrameLayout
+            android:id="@+id/ego_side_right_color_panel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <TextureView
+                android:id="@+id/ego_side_right_color"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <com.bingo.smartna.collector.device.ego.view.OBGLView
+                android:id="@+id/ego_side_right_color_raw"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/ego_side_right_color_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|top"
+                android:layout_margin="4dp"
+                android:background="#80000000"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="Side Right"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+        </FrameLayout>
+
+    </FrameLayout>
+
+    <!-- Horizontal divider -->
+    <View
+        android:id="@+id/ego_divider_h"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#666666"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.65" />
+
+    <!-- Bottom-left: Audio info + Record button (占 35% 高度, 左半) -->
+    <LinearLayout
+        android:id="@+id/ego_audio_panel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ego_divider_v"
+        app:layout_constraintTop_toBottomOf="@id/ego_divider_h"
+        app:layout_constraintBottom_toTopOf="@id/ego_csv_path_info">
+
+        <TextView
+            android:id="@+id/ego_audio_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Audio: waiting..."
+            android:textColor="#00FF00"
+            android:textSize="13sp"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btn_ego_stream_config"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stream settings"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_csv_collect"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:enabled="false"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="4dp"
+                    android:text="Collect"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btn_ego_voice_test"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="4dp"
+                    android:text="Voice"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/input_ego_volume"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="3"
+                    android:gravity="center"
+                    android:hint="dB"
+                    android:inputType="numberSigned"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="4dp"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btn_ego_volume_set"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="4dp"
+                    android:text="SET VOL"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Vertical divider -->
+    <View
+        android:id="@+id/ego_divider_v"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:background="#666666"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ego_divider_h"
+        app:layout_constraintBottom_toTopOf="@id/ego_csv_path_info" />
+
+    <!-- Bottom-right: IMU data (占 35% 高度, 右半) -->
+    <LinearLayout
+        android:id="@+id/ego_imu_panel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        app:layout_constraintStart_toEndOf="@id/ego_divider_v"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ego_divider_h"
+        app:layout_constraintBottom_toTopOf="@id/ego_csv_path_info">
+
+        <TextView
+            android:id="@+id/ego_accel_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Accel: --"
+            android:textColor="#00FF00"
+            android:textSize="12sp"
+            android:maxLines="2" />
+
+        <TextView
+            android:id="@+id/ego_gyro_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Gyro: --"
+            android:textColor="#00FF00"
+            android:textSize="12sp"
+            android:maxLines="2" />
+
+        <TextView
+            android:id="@+id/ego_state_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="EGO State: waiting..."
+            android:textColor="#00FF00"
+            android:textSize="11sp"
+            android:maxLines="3"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <!-- Bottom bar: CSV storage directory -->
+    <TextView
+        android:id="@+id/ego_csv_path_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#101010"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:text="CSV: --"
+        android:textColor="#AAAAAA"
+        android:textSize="10sp"
+        android:maxLines="2"
+        android:ellipsize="middle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
