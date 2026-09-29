@@ -64,7 +64,7 @@ class UploadActivity : BaseActivity<ActivityUploadBinding, CollectorViewModel>()
             val task = MockDataSource.allTasks.find { it.id == taskId }
                 ?: viewModel.ui.value?.userTaskFor(taskId)?.task
             if (task != null) {
-                CaptureActivity.start(this, task, demoMode = true)
+                CaptureActivity.start(this, task)
             }
             finish()
         }

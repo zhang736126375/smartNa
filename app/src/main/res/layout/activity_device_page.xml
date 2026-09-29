@@ -473,14 +473,26 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <TextView
-                    android:id="@+id/btnDebug"
+                    android:id="@+id/btnPreview"
                     android:layout_width="match_parent"
                     android:layout_height="54dp"
                     android:layout_marginTop="16dp"
                     android:background="@drawable/bg_btn_primary"
                     android:gravity="center"
-                    android:text="@string/device_go_debug"
+                    android:text="@string/device_open_preview"
                     android:textColor="@color/white"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btnDebug"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_btn_ghost"
+                    android:gravity="center"
+                    android:text="@string/device_go_debug"
+                    android:textColor="@color/brand_primary_active"
                     android:textSize="17sp"
                     android:textStyle="bold"
                     android:visibility="gone" />

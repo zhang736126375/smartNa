@@ -57,6 +57,7 @@ import com.orbbec.obsensor.types.PermissionType;
 import com.orbbec.obsensor.types.SensorType;
 import com.orbbec.obsensor.types.StreamType;
 import com.bingo.smartna.R;
+import com.bingo.smartna.collector.data.Prefs;
 import com.bingo.smartna.collector.device.ego.view.OBGLView;
 
 import java.io.File;
@@ -95,6 +96,15 @@ import java.util.concurrent.TimeUnit;
 public class EgoSampleNetActivity extends EgoSdkActivity {
 
     public static final String EXTRA_IP = "extra_ip";
+    public static final String EXTRA_PORT = "extra_port";
+    public static final int DEFAULT_NET_PORT = 8090;
+
+    public static void start(Context context, String ip, int port) {
+        Intent intent = new Intent(context, EgoSampleNetActivity.class);
+        intent.putExtra(EXTRA_IP, ip);
+        intent.putExtra(EXTRA_PORT, port > 0 ? port : DEFAULT_NET_PORT);
+        context.startActivity(intent);
+    }
 
     private static final String TAG = EgoSampleNetActivity.class.getSimpleName();
 
@@ -713,6 +723,7 @@ public class EgoSampleNetActivity extends EgoSdkActivity {
                 }
                 refreshAudioPlaybackVolumeRange(mDevice);
                 registerEgoStateCallback();
+                new Prefs(EgoSampleNetActivity.this).saveConnectedNetDevice(finalAddress, finalPort);
                 runOnUiThread(() -> {
                     showToast("已连接到 " + finalAddress + ":" + finalPort);
                     mOpenNetDeviceButton.setEnabled(false);
@@ -777,9 +788,13 @@ public class EgoSampleNetActivity extends EgoSdkActivity {
         initSDK();
 
         String autoIp = getIntent().getStringExtra(EXTRA_IP);
+        int autoPort = getIntent().getIntExtra(EXTRA_PORT, DEFAULT_NET_PORT);
+        if (autoPort <= 0) {
+            autoPort = DEFAULT_NET_PORT;
+        }
         if (!TextUtils.isEmpty(autoIp)) {
             mNetIpInput.setText(autoIp);
-            mNetPortInput.setText("8090");
+            mNetPortInput.setText(String.valueOf(autoPort));
             mPendingAutoIp = autoIp;
         }
     }

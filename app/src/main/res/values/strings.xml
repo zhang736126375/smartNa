@@ -223,6 +223,8 @@
     <string name="device_page_title">我的设备</string>
     <string name="device_name_grasp">抓贝头环</string>
     <string name="device_serial">编号 EG-2049</string>
+    <string name="device_address">%1$s:%2$d</string>
+    <string name="device_open_preview">打开预览</string>
     <string name="device_cam_ok">相机正常</string>
     <string name="device_stable_ok">不晃正常</string>
     <string name="device_fps">120帧</string>
@@ -242,7 +244,7 @@
     <string name="device_log_3">已和手机对好时间</string>
     <string name="device_log_time">09:32</string>
     <string name="device_empty_title">还没连上头环</string>
-    <string name="device_empty_sub">扫头环侧面的码就能连上</string>
+    <string name="device_empty_sub">先给头环配网，连上后就能采集</string>
     <string name="device_go_connect">去连接设备</string>
     <string name="device_go_debug">试试镜头</string>
     <string name="capture_title">采集</string>
@@ -411,6 +413,9 @@
 
     <string name="debug_title">试试镜头</string>
     <string name="debug_preview_hint">LIVE PREVIEW · 120FPS</string>
+    <string name="debug_connecting">正在连接头环…</string>
+    <string name="debug_stream_failed">头环画面打不开：%1$s</string>
+    <string name="capture_stream_hint">头环画面已接入，点开始开始采集</string>
     <string name="debug_hand">两只手放框里</string>
     <string name="debug_auto_title">相机全自动，不用您调</string>
     <string name="debug_check_left">左眼 ✓</string>

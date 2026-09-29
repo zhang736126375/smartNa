@@ -1,14 +1,13 @@
 package com.bingo.smartna.collector.device
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseActivity
+import com.bingo.smartna.collector.data.Prefs
+import com.bingo.smartna.collector.device.ego.EgoNetDeviceFoundActivity
 import com.bingo.smartna.databinding.ActivityConnectKitBinding
 import com.blankj.utilcode.util.ClickUtils
 
@@ -19,22 +18,12 @@ class ConnectKitActivity : BaseActivity<ActivityConnectKitBinding, DeviceConnect
         refreshNext()
     }
 
-    private val scanLauncher = registerForActivityResult(
+    private val provisionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
+    ) {
+        if (Prefs(this).hasConnectedDevice) {
             setResult(RESULT_OK)
             finish()
-        }
-    }
-
-    private val cameraPermission = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) {
-            openScan()
-        } else {
-            Toast.makeText(this, R.string.device_camera_denied, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -48,33 +37,17 @@ class ConnectKitActivity : BaseActivity<ActivityConnectKitBinding, DeviceConnect
         refreshNext()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (Prefs(this).hasConnectedDevice) {
+            setResult(RESULT_OK)
+            finish()
+        }
+    }
+
     private fun onNext() {
-        val kit = viewModel.selectedKit ?: return
-        if (kit.hasEgo) {
-            DevicePowerDialog().apply {
-                onPowered = { requestCameraThenScan() }
-            }.show(supportFragmentManager, DevicePowerDialog.TAG)
-        } else {
-            requestCameraThenScan()
-        }
-    }
-
-    private fun requestCameraThenScan() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            openScan()
-        } else {
-            cameraPermission.launch(Manifest.permission.CAMERA)
-        }
-    }
-
-    private fun openScan() {
-        val kit = viewModel.selectedKit ?: return
-        scanLauncher.launch(
-            Intent(this, ScanDeviceActivity::class.java)
-                .putExtra(ScanDeviceActivity.EXTRA_KIT_ID, kit.id)
-        )
+        if (viewModel.selectedKit == null) return
+        provisionLauncher.launch(Intent(this, EgoNetDeviceFoundActivity::class.java))
     }
 
     private fun refreshNext() {

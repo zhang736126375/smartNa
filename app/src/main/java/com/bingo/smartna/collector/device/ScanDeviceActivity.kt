@@ -1,16 +1,16 @@
 package com.bingo.smartna.collector.device
 
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.lifecycle.lifecycleScope
-import com.bingo.smartna.MainActivity
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseActivity
 import com.bingo.smartna.base.ui.BaseViewModel
-import com.bingo.smartna.collector.data.Prefs
+import com.bingo.smartna.collector.device.ego.EgoNetDeviceFoundActivity
 import com.bingo.smartna.databinding.ActivityScanDeviceBinding
 import com.blankj.utilcode.util.ClickUtils
 import com.huawei.hms.hmsscankit.RemoteView
@@ -108,9 +108,7 @@ class ScanDeviceActivity : BaseActivity<ActivityScanDeviceBinding, BaseViewModel
     private fun onScanSuccess(value: String) {
         if (handled) return
         handled = true
-        Prefs(this).saveConnectedDevice(kit.id, value)
-        setResult(RESULT_OK)
-        DevicePageActivity.start(this)
+        startActivity(Intent(this, EgoNetDeviceFoundActivity::class.java))
         finish()
     }
 
@@ -142,7 +140,7 @@ class ScanDeviceActivity : BaseActivity<ActivityScanDeviceBinding, BaseViewModel
 
     companion object {
         const val EXTRA_KIT_ID = "kit_id"
-        private const val DEMO_MOCK_SCAN = true
+        private const val DEMO_MOCK_SCAN = false
         private const val DEMO_DISCOVER_MS = 3000L
         private const val DEMO_QR_VALUE = "demo-qr"
     }

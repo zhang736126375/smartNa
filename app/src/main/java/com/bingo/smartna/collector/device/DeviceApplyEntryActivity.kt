@@ -13,6 +13,7 @@ import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseActivity
 import com.bingo.smartna.base.ui.BaseViewModel
 import com.bingo.smartna.collector.data.Prefs
+import com.bingo.smartna.collector.device.ego.EgoNetDeviceFoundActivity
 import com.bingo.smartna.databinding.ActivityDeviceApplyEntryBinding
 import com.blankj.utilcode.util.ClickUtils
 import kotlinx.coroutines.delay
@@ -58,7 +59,7 @@ class DeviceApplyEntryActivity : BaseActivity<ActivityDeviceApplyEntryBinding, B
                 if (Prefs(this).hasConnectedDevice) {
                     finishWithResult()
                 } else {
-                    startActivity(Intent(this, ConnectKitActivity::class.java))
+                    startActivity(Intent(this, EgoNetDeviceFoundActivity::class.java))
                 }
             } else {
                 persistApplyAndFinish()

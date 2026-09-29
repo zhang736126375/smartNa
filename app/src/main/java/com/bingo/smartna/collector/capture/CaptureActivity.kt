@@ -1,30 +1,22 @@
 package com.bingo.smartna.collector.capture
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.video.Quality
-import androidx.camera.video.QualitySelector
-import androidx.camera.video.Recorder
-import androidx.camera.video.Recording
-import androidx.camera.video.VideoCapture
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseActivity
 import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.CollectorViewModels
+import com.bingo.smartna.collector.data.Prefs
 import com.bingo.smartna.collector.data.model.ClipRecord
 import com.bingo.smartna.collector.data.model.Task
+import com.bingo.smartna.collector.device.DevicePageActivity
+import com.bingo.smartna.collector.device.ego.EgoCollectorSession
 import com.bingo.smartna.collector.upload.UploadActivity
 import com.bingo.smartna.databinding.ActivityCaptureBinding
 import com.blankj.utilcode.util.ClickUtils
@@ -37,13 +29,10 @@ import java.util.concurrent.TimeUnit
 
 class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>() {
 
-    private var videoCapture: VideoCapture<Recorder>? = null
-    private var recording: Recording? = null
     private var taskTitle: String = ""
     private var taskId: String = ""
     private var targetClips: Int = 1
     private var doneClips: Int = 0
-    private var demoMode: Boolean = true
 
     private var capturePhase = CapturePhase.PREVIEW
     private var recordStartElapsed = 0L
@@ -52,18 +41,7 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
     private var lastDurationMs = 0L
     private var timerJob: Job? = null
     private var pendingClip: ClipRecord? = null
-
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { grants ->
-        val cameraOk = grants[Manifest.permission.CAMERA] == true || hasCameraPermission()
-        if (cameraOk) {
-            bindCamera()
-        } else {
-            Toast.makeText(this, R.string.capture_camera_denied, Toast.LENGTH_SHORT).show()
-            finish()
-        }
-    }
+    private val session = EgoCollectorSession.get()
 
     override fun inflateBinding() = ActivityCaptureBinding.inflate(layoutInflater)
 
@@ -74,10 +52,10 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
         taskTitle = intent.getStringExtra(EXTRA_TASK_TITLE).orEmpty()
         targetClips = intent.getIntExtra(EXTRA_TARGET_CLIPS, 1)
         doneClips = intent.getIntExtra(EXTRA_DONE_CLIPS, 0)
-        demoMode = intent.getBooleanExtra(EXTRA_DEMO_MODE, true)
     }
 
     override fun initData() {
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         viewModel.ui.value?.userTaskFor(taskId)?.let { userTask ->
             doneClips = userTask.doneClips
             targetClips = userTask.demoTargetClips()
@@ -87,26 +65,56 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
         ClickUtils.applySingleDebouncing(binding.btnPause) { togglePause() }
         ClickUtils.applySingleDebouncing(binding.btnUpload) { onUploadClick() }
         ClickUtils.applySingleDebouncing(binding.btnRetake) { onRetakeClick() }
-        if (demoMode) {
-            binding.demoPanel.visibility = View.VISIBLE
-            binding.previewView.visibility = View.GONE
-        } else {
-            binding.demoPanel.visibility = View.GONE
-            binding.previewView.visibility = View.VISIBLE
-            if (hasCameraPermission()) {
-                bindCamera()
-            } else {
-                permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO))
-            }
+        if (!Prefs(this).hasConnectedDevice) {
+            DevicePageActivity.start(this, taskId)
+            finish()
+            return
         }
+        attachPreview()
         renderPreviewPhase()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        session.onHostResume()
+    }
+
+    override fun onPause() {
+        session.onHostPause()
+        super.onPause()
     }
 
     override fun onDestroy() {
         timerJob?.cancel()
-        recording?.stop()
-        recording = null
+        if (capturePhase == CapturePhase.RECORDING) {
+            session.stopCollecting()
+        }
+        session.detach(this, !isChangingConfigurations)
         super.onDestroy()
+    }
+
+    private fun attachPreview() {
+        val targets = EgoCollectorSession.PreviewTargets().apply {
+            left = binding.glLeft
+            right = binding.glRight
+            leftTv = binding.tvLeft
+            rightTv = binding.tvRight
+            rightPanel = binding.previewRightSlot
+        }
+        session.attach(this, targets, object : EgoCollectorSession.Listener {
+            override fun onStatus(message: String) {
+                binding.tvPreviewHint.text = message
+            }
+
+            override fun onStreamingChanged(streaming: Boolean, stereo: Boolean) {
+                binding.previewRightSlot.visibility = if (stereo) View.VISIBLE else View.GONE
+            }
+
+            override fun onError(message: String) {
+                binding.tvPreviewHint.text = message
+                Toast.makeText(this@CaptureActivity, message, Toast.LENGTH_LONG).show()
+            }
+        })
     }
 
     private fun onBackPressedInternal() {
@@ -126,6 +134,13 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
     }
 
     private fun startRecording() {
+        if (!session.isStreaming) {
+            Toast.makeText(this, R.string.debug_connecting, Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (!session.startCollecting()) {
+            return
+        }
         capturePhase = CapturePhase.RECORDING
         paused = false
         pausedAccumulated = 0L
@@ -163,6 +178,7 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
 
     private fun finishRecording() {
         timerJob?.cancel()
+        session.stopCollecting()
         lastDurationMs = currentElapsed().coerceAtLeast(1000L)
         val clip = viewModel.recordDemoClip(taskId, lastDurationMs)
         if (clip == null) {
@@ -229,9 +245,8 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
         binding.tvRecTimer.text = formatClock(elapsedMs)
 
         val recording = capturePhase == CapturePhase.RECORDING
-        binding.btnPause.visibility = if (recording) View.VISIBLE else View.GONE
-        (binding.btnRecord.layoutParams as LinearLayout.LayoutParams).marginStart =
-            if (recording) dp(12) else 0
+        binding.btnPause.visibility = View.GONE
+        (binding.btnRecord.layoutParams as LinearLayout.LayoutParams).marginStart = 0
         binding.btnRecord.requestLayout()
 
         when {
@@ -241,25 +256,15 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
                 binding.tvRecLabel.setText(R.string.capture_ready)
                 binding.tvRecLabel.setTextColor(ContextCompat.getColor(this, R.color.hud_gold))
                 binding.btnRecord.setText(R.string.capture_demo_start)
-                binding.tvStatus.setText(R.string.capture_demo_hint)
-            }
-            recording && paused -> {
-                binding.recChip.setBackgroundResource(R.drawable.bg_hchip)
-                binding.recDot.visibility = View.VISIBLE
-                binding.tvRecLabel.setText(R.string.capture_paused)
-                binding.tvRecLabel.setTextColor(ContextCompat.getColor(this, R.color.hud_gold))
-                binding.btnPause.setText(R.string.capture_resume)
-                binding.btnRecord.setText(R.string.capture_finish)
-                binding.tvStatus.setText(R.string.capture_paused)
+                binding.tvStatus.setText(R.string.capture_stream_hint)
             }
             recording -> {
                 binding.recChip.setBackgroundResource(R.drawable.bg_hchip_rec)
                 binding.recDot.visibility = View.VISIBLE
                 binding.tvRecLabel.setText(R.string.capture_recording)
                 binding.tvRecLabel.setTextColor(ContextCompat.getColor(this, R.color.rec_red))
-                binding.btnPause.setText(R.string.capture_pause)
                 binding.btnRecord.setText(R.string.capture_finish)
-                binding.tvStatus.setText(R.string.capture_demo_hint)
+                binding.tvStatus.setText(R.string.capture_recording)
             }
             else -> {
                 binding.recChip.setBackgroundResource(R.drawable.bg_hchip)
@@ -306,29 +311,6 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
 
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
 
-    private fun hasCameraPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
-            PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun bindCamera() {
-        val future = ProcessCameraProvider.getInstance(this)
-        future.addListener({
-            if (isFinishing || isDestroyed) return@addListener
-            val provider = future.get()
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(binding.previewView.surfaceProvider)
-            }
-            val recorder = Recorder.Builder()
-                .setQualitySelector(QualitySelector.from(Quality.HD))
-                .build()
-            val capture = VideoCapture.withOutput(recorder)
-            provider.unbindAll()
-            provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, capture)
-            videoCapture = capture
-        }, ContextCompat.getMainExecutor(this))
-    }
-
     private enum class CapturePhase {
         PREVIEW, RECORDING, COMPLETE
     }
@@ -338,17 +320,15 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
         private const val EXTRA_TASK_TITLE = "task_title"
         private const val EXTRA_TARGET_CLIPS = "target_clips"
         private const val EXTRA_DONE_CLIPS = "done_clips"
-        private const val EXTRA_DEMO_MODE = "demo_mode"
         const val CLIPS_DIR = "clips"
 
-        fun start(context: Context, task: Task, demoMode: Boolean = true) {
+        fun start(context: Context, task: Task) {
             context.startActivity(
                 Intent(context, CaptureActivity::class.java)
                     .putExtra(EXTRA_TASK_ID, task.id)
                     .putExtra(EXTRA_TASK_TITLE, task.title)
                     .putExtra(EXTRA_TARGET_CLIPS, task.targetClips)
                     .putExtra(EXTRA_DONE_CLIPS, task.doneClips)
-                    .putExtra(EXTRA_DEMO_MODE, demoMode)
             )
         }
     }

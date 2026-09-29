@@ -112,24 +112,53 @@
             android:layout_marginTop="12dp"
             android:layout_weight="1">
 
-            <FrameLayout
-                android:id="@+id/demoPanel"
+            <LinearLayout
+                android:id="@+id/previewHost"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/capture_hud">
+                android:background="@color/capture_hud"
+                android:orientation="horizontal">
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1.5dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="@drawable/bg_scanline" />
-            </FrameLayout>
+                <FrameLayout
+                    android:id="@+id/previewLeftSlot"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
 
-            <androidx.camera.view.PreviewView
-                android:id="@+id/previewView"
+                    <TextureView
+                        android:id="@+id/tvLeft"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <com.bingo.smartna.collector.device.ego.view.OBGLView
+                        android:id="@+id/glLeft"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/previewRightSlot"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextureView
+                        android:id="@+id/tvRight"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <com.bingo.smartna.collector.device.ego.view.OBGLView
+                        android:id="@+id/glRight"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone" />
+                android:layout_height="1.5dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/bg_scanline" />
 
             <View
                 android:layout_width="16dp"

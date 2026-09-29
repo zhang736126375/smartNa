@@ -40,12 +40,12 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
         }
         binding.btnMore.setOnClickListener { onMoreClicked() }
         ClickUtils.applySingleDebouncing(binding.btnConnect) {
-            connectLauncher.launch(Intent(requireContext(), ConnectKitActivity::class.java))
+            connectLauncher.launch(Intent(requireContext(), EgoNetDeviceFoundActivity::class.java))
         }
         ClickUtils.applySingleDebouncing(binding.btnViewApply) { openApplyProgress() }
         ClickUtils.applySingleDebouncing(binding.btnViewApplyConnected) { openApplyProgress() }
         ClickUtils.applySingleDebouncing(binding.btnConnectFromApplied) {
-            connectLauncher.launch(Intent(requireContext(), ConnectKitActivity::class.java))
+            connectLauncher.launch(Intent(requireContext(), EgoNetDeviceFoundActivity::class.java))
         }
         ClickUtils.applySingleDebouncing(binding.btnDisconnect) {
             Prefs(requireContext()).clearConnectedDevice()
@@ -79,10 +79,10 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
 
     private fun renderState() {
         val prefs = Prefs(requireContext())
-        val kit = DeviceKit.fromId(prefs.connectedKitId)
+        val kit = DeviceKit.fromId(prefs.connectedKitId) ?: DeviceKit.EGO
         val showApplyProgress = prefs.isApplyCompleted
         when {
-            kit != null -> {
+            prefs.hasConnectedDevice -> {
                 binding.emptyPanel.visibility = View.GONE
                 binding.appliedPanel.visibility = View.GONE
                 binding.connectedPanel.visibility = View.VISIBLE

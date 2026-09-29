@@ -5,7 +5,7 @@ import com.bingo.smartna.collector.data.model.DeviceApplyStatus
 import com.bingo.smartna.collector.data.model.DeviceShipmentStatus
 import com.bingo.smartna.collector.data.model.UserRole
 
-/** 登录态、角色、提权申请、已连接设备。 */
+/** 登录态、角色、提权申请、已连接网络设备（IP:port 仅在 createNetDevice 成功后写入）。 */
 class Prefs(context: Context) {
 
     private val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -93,19 +93,25 @@ class Prefs(context: Context) {
     val connectedKitId: String?
         get() = sp.getString(KEY_CONNECTED_KIT, null)
 
-    val connectedQr: String?
-        get() = sp.getString(KEY_CONNECTED_QR, null)
+    val connectedIp: String?
+        get() = sp.getString(KEY_CONNECTED_IP, null)
+
+    val connectedPort: Int
+        get() = sp.getInt(KEY_CONNECTED_PORT, DEFAULT_NET_PORT)
 
     val hasConnectedDevice: Boolean
-        get() = !connectedKitId.isNullOrBlank()
+        get() = !connectedIp.isNullOrBlank()
 
-    fun saveConnectedDevice(kitId: String, qr: String) {
+    fun saveConnectedNetDevice(ip: String, port: Int) {
+        val normalizedPort = if (port > 0) port else DEFAULT_NET_PORT
         sp.edit()
-            .putString(KEY_CONNECTED_KIT, kitId)
-            .putString(KEY_CONNECTED_QR, qr)
+            .putString(KEY_CONNECTED_KIT, "ego")
+            .putString(KEY_CONNECTED_IP, ip)
+            .putInt(KEY_CONNECTED_PORT, normalizedPort)
+            .remove(KEY_CONNECTED_QR)
             .apply()
         if (!isApplyCompleted) {
-            saveApplyCompleted(kitId)
+            saveApplyCompleted("ego")
         }
     }
 
@@ -113,6 +119,8 @@ class Prefs(context: Context) {
         sp.edit()
             .remove(KEY_CONNECTED_KIT)
             .remove(KEY_CONNECTED_QR)
+            .remove(KEY_CONNECTED_IP)
+            .remove(KEY_CONNECTED_PORT)
             .apply()
     }
 
@@ -147,6 +155,9 @@ class Prefs(context: Context) {
         const val KEY_UPGRADE_LEAD_AREA = "upgrade_lead_area"
         const val KEY_CONNECTED_KIT = "connected_kit"
         const val KEY_CONNECTED_QR = "connected_qr"
+        const val KEY_CONNECTED_IP = "connected_ip"
+        const val KEY_CONNECTED_PORT = "connected_port"
+        const val DEFAULT_NET_PORT = 8090
         const val KEY_APPLY_STATUS = "device_apply_status"
         const val KEY_APPLY_KIT = "device_apply_kit"
         const val KEY_SHIPMENT_STATUS = "device_shipment_status"

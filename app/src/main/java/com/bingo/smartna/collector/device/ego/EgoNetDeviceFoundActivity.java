@@ -449,9 +449,8 @@ public class EgoNetDeviceFoundActivity extends AppCompatActivity {
             Toast.makeText(this, "Invalid IP address", Toast.LENGTH_SHORT).show();
             return;
         }
-        Intent intent = new Intent(this, EgoSampleNetActivity.class);
-        intent.putExtra(EgoSampleNetActivity.EXTRA_IP, ip);
-        startActivity(intent);
+        EgoSampleNetActivity.start(this, ip, EgoSampleNetActivity.DEFAULT_NET_PORT);
+        finish();
     }
 
     // ── BLE Executor ─────────────────────────────────────────────────

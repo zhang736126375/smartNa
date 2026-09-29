@@ -11,6 +11,7 @@ import com.bingo.smartna.base.ui.BaseActivity
 import com.bingo.smartna.base.ui.BaseViewModel
 import com.bingo.smartna.collector.data.Prefs
 import com.bingo.smartna.collector.device.ego.EgoNetDeviceFoundActivity
+import com.bingo.smartna.collector.device.ego.EgoSampleNetActivity
 import com.bingo.smartna.databinding.ActivityDevicePageBinding
 import com.blankj.utilcode.util.ClickUtils
 
@@ -19,15 +20,13 @@ class DevicePageActivity : BaseActivity<ActivityDevicePageBinding, BaseViewModel
     private var taskId: String = ""
     private var moreClickCount = 0
     private var moreClickWindowStart = 0L
+    private var pendingTaskAfterConnect = false
 
     private val connectLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         renderState()
-        if (Prefs(this).hasConnectedDevice && taskId.isNotBlank()) {
-            CameraDebugActivity.start(this, taskId)
-            finish()
-        }
+        maybeContinueTask()
     }
 
     override fun inflateBinding() = ActivityDevicePageBinding.inflate(layoutInflater)
@@ -40,8 +39,10 @@ class DevicePageActivity : BaseActivity<ActivityDevicePageBinding, BaseViewModel
         ClickUtils.applySingleDebouncing(binding.btnBack) { finish() }
         binding.btnMore.setOnClickListener { onMoreClicked() }
         ClickUtils.applySingleDebouncing(binding.btnConnect) {
-            connectLauncher.launch(Intent(this, ConnectKitActivity::class.java))
+            pendingTaskAfterConnect = taskId.isNotBlank()
+            launchProvisioning()
         }
+        ClickUtils.applySingleDebouncing(binding.btnPreview) { openPreview() }
         ClickUtils.applySingleDebouncing(binding.btnDisconnect) {
             Prefs(this).clearConnectedDevice()
             Toast.makeText(this, R.string.device_unbind_done, Toast.LENGTH_SHORT).show()
@@ -59,6 +60,28 @@ class DevicePageActivity : BaseActivity<ActivityDevicePageBinding, BaseViewModel
     override fun onResume() {
         super.onResume()
         renderState()
+        maybeContinueTask()
+    }
+
+    private fun launchProvisioning() {
+        connectLauncher.launch(Intent(this, EgoNetDeviceFoundActivity::class.java))
+    }
+
+    private fun openPreview() {
+        val prefs = Prefs(this)
+        val ip = prefs.connectedIp
+        if (ip.isNullOrBlank()) {
+            launchProvisioning()
+            return
+        }
+        EgoSampleNetActivity.start(this, ip, prefs.connectedPort)
+    }
+
+    private fun maybeContinueTask() {
+        if (!pendingTaskAfterConnect || taskId.isBlank() || !Prefs(this).hasConnectedDevice) return
+        pendingTaskAfterConnect = false
+        CameraDebugActivity.start(this, taskId)
+        finish()
     }
 
     private fun onMoreClicked() {
@@ -70,14 +93,19 @@ class DevicePageActivity : BaseActivity<ActivityDevicePageBinding, BaseViewModel
         moreClickCount += 1
         if (moreClickCount >= MORE_CLICK_TO_SCAN) {
             moreClickCount = 0
-            startActivity(Intent(this, EgoNetDeviceFoundActivity::class.java))
+            launchProvisioning()
         }
     }
 
     private fun renderState() {
-        val connected = Prefs(this).hasConnectedDevice
+        val prefs = Prefs(this)
+        val connected = prefs.hasConnectedDevice
         binding.emptyPanel.visibility = if (connected) View.GONE else View.VISIBLE
         binding.connectedPanel.visibility = if (connected) View.VISIBLE else View.GONE
+        if (connected) {
+            val ip = prefs.connectedIp.orEmpty()
+            binding.tvDeviceSerial.text = getString(R.string.device_address, ip, prefs.connectedPort)
+        }
         binding.btnDebug.visibility =
             if (connected && taskId.isNotBlank()) View.VISIBLE else View.GONE
     }
