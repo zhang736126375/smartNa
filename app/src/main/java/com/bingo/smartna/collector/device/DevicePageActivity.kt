@@ -104,6 +104,9 @@ class DevicePageActivity : BaseActivity<ActivityDevicePageBinding, BaseViewModel
         binding.connectedPanel.visibility = if (connected) View.VISIBLE else View.GONE
         if (connected) {
             val ip = prefs.connectedIp.orEmpty()
+            binding.tvDeviceName.text = prefs.connectedName
+                ?.takeIf { it.isNotBlank() }
+                ?: getString(R.string.device_name_grasp)
             binding.tvDeviceSerial.text = getString(R.string.device_address, ip, prefs.connectedPort)
         }
         binding.btnDebug.visibility =
@@ -115,10 +118,13 @@ class DevicePageActivity : BaseActivity<ActivityDevicePageBinding, BaseViewModel
         private const val MORE_CLICK_TO_SCAN = 3
         private const val MORE_CLICK_WINDOW_MS = 2000L
 
+        @JvmStatic
+        @JvmOverloads
         fun start(context: Context, taskId: String? = null) {
             context.startActivity(
                 Intent(context, DevicePageActivity::class.java)
                     .putExtra(EXTRA_TASK_ID, taskId.orEmpty())
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             )
         }
     }

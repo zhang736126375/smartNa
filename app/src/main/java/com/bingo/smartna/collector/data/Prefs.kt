@@ -5,7 +5,7 @@ import com.bingo.smartna.collector.data.model.DeviceApplyStatus
 import com.bingo.smartna.collector.data.model.DeviceShipmentStatus
 import com.bingo.smartna.collector.data.model.UserRole
 
-/** 登录态、角色、提权申请、已连接网络设备（IP:port 仅在 createNetDevice 成功后写入）。 */
+/** 登录态、角色、提权申请、已连接网络设备（拿到设备 IP 后写入）。 */
 class Prefs(context: Context) {
 
     private val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -99,17 +99,31 @@ class Prefs(context: Context) {
     val connectedPort: Int
         get() = sp.getInt(KEY_CONNECTED_PORT, DEFAULT_NET_PORT)
 
+    val connectedName: String?
+        get() = sp.getString(KEY_CONNECTED_NAME, null)
+
+    val connectedBleAddress: String?
+        get() = sp.getString(KEY_CONNECTED_BLE, null)
+
     val hasConnectedDevice: Boolean
         get() = !connectedIp.isNullOrBlank()
 
-    fun saveConnectedNetDevice(ip: String, port: Int) {
+    @JvmOverloads
+    fun saveConnectedNetDevice(ip: String, port: Int = DEFAULT_NET_PORT, deviceName: String? = null,
+                               bleAddress: String? = null) {
         val normalizedPort = if (port > 0) port else DEFAULT_NET_PORT
-        sp.edit()
+        val editor = sp.edit()
             .putString(KEY_CONNECTED_KIT, "ego")
             .putString(KEY_CONNECTED_IP, ip)
             .putInt(KEY_CONNECTED_PORT, normalizedPort)
             .remove(KEY_CONNECTED_QR)
-            .apply()
+        if (!deviceName.isNullOrBlank()) {
+            editor.putString(KEY_CONNECTED_NAME, deviceName)
+        }
+        if (!bleAddress.isNullOrBlank()) {
+            editor.putString(KEY_CONNECTED_BLE, bleAddress)
+        }
+        editor.apply()
         if (!isApplyCompleted) {
             saveApplyCompleted("ego")
         }
@@ -121,6 +135,8 @@ class Prefs(context: Context) {
             .remove(KEY_CONNECTED_QR)
             .remove(KEY_CONNECTED_IP)
             .remove(KEY_CONNECTED_PORT)
+            .remove(KEY_CONNECTED_NAME)
+            .remove(KEY_CONNECTED_BLE)
             .apply()
     }
 
@@ -157,6 +173,8 @@ class Prefs(context: Context) {
         const val KEY_CONNECTED_QR = "connected_qr"
         const val KEY_CONNECTED_IP = "connected_ip"
         const val KEY_CONNECTED_PORT = "connected_port"
+        const val KEY_CONNECTED_NAME = "connected_name"
+        const val KEY_CONNECTED_BLE = "connected_ble"
         const val DEFAULT_NET_PORT = 8090
         const val KEY_APPLY_STATUS = "device_apply_status"
         const val KEY_APPLY_KIT = "device_apply_kit"

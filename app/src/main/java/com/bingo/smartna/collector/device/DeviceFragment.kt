@@ -86,7 +86,9 @@ class DeviceFragment : BaseFragment<FragmentDeviceBinding, BaseViewModel>() {
                 binding.emptyPanel.visibility = View.GONE
                 binding.appliedPanel.visibility = View.GONE
                 binding.connectedPanel.visibility = View.VISIBLE
-                binding.tvConnectedName.setText(kit.titleRes)
+                binding.tvConnectedName.text = prefs.connectedName
+                    ?.takeIf { it.isNotBlank() }
+                    ?: getString(kit.titleRes)
                 binding.connectedApplyTags.visibility = if (showApplyProgress) View.VISIBLE else View.GONE
                 binding.btnViewApplyConnected.visibility = if (showApplyProgress) View.VISIBLE else View.GONE
             }

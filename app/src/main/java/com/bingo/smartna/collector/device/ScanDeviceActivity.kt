@@ -38,12 +38,16 @@ class ScanDeviceActivity : BaseActivity<ActivityScanDeviceBinding, BaseViewModel
     }
 
     override fun initData() {
-        binding.tvScanHint.text = getString(R.string.device_scan_hint, getString(kit.scanPartRes))
+        binding.tvScanHint.text = if (returnQr) {
+            getString(R.string.device_scan_qr_name_hint)
+        } else {
+            getString(R.string.device_scan_hint, getString(kit.scanPartRes))
+        }
         binding.ivGuide.setImageResource(
             if (kit == DeviceKit.GRIPPER) R.drawable.ic_kit_gripper else R.drawable.ic_kit_ego
         )
         ClickUtils.applySingleDebouncing(binding.btnBack) { finish() }
-        if (DEMO_MOCK_SCAN) {
+        if (DEMO_MOCK_SCAN && !returnQr) {
             setupDemoScan()
         } else {
             binding.demoScanPanel.visibility = View.GONE
@@ -108,6 +112,11 @@ class ScanDeviceActivity : BaseActivity<ActivityScanDeviceBinding, BaseViewModel
     private fun onScanSuccess(value: String) {
         if (handled) return
         handled = true
+        if (returnQr) {
+            setResult(RESULT_OK, Intent().putExtra(EXTRA_QR_VALUE, value))
+            finish()
+            return
+        }
         startActivity(Intent(this, EgoNetDeviceFoundActivity::class.java))
         finish()
     }
@@ -138,8 +147,13 @@ class ScanDeviceActivity : BaseActivity<ActivityScanDeviceBinding, BaseViewModel
         super.onDestroy()
     }
 
+    private val returnQr: Boolean
+        get() = intent.getBooleanExtra(EXTRA_RETURN_QR, false)
+
     companion object {
         const val EXTRA_KIT_ID = "kit_id"
+        const val EXTRA_RETURN_QR = "return_qr"
+        const val EXTRA_QR_VALUE = "qr_value"
         private const val DEMO_MOCK_SCAN = false
         private const val DEMO_DISCOVER_MS = 3000L
         private const val DEMO_QR_VALUE = "demo-qr"

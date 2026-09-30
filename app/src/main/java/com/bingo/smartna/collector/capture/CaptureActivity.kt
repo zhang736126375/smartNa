@@ -41,6 +41,7 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
     private var lastDurationMs = 0L
     private var timerJob: Job? = null
     private var pendingClip: ClipRecord? = null
+    private var handingOff = false
     private val session = EgoCollectorSession.get()
 
     override fun inflateBinding() = ActivityCaptureBinding.inflate(layoutInflater)
@@ -89,7 +90,7 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
         if (capturePhase == CapturePhase.RECORDING) {
             session.stopCollecting()
         }
-        session.detach(this, !isChangingConfigurations)
+        session.detach(this, !handingOff && !isChangingConfigurations)
         super.onDestroy()
     }
 
@@ -204,6 +205,8 @@ class CaptureActivity : BaseActivity<ActivityCaptureBinding, CollectorViewModel>
 
     private fun onUploadClick() {
         val clip = pendingClip ?: return
+        val moreToCapture = viewModel.ui.value?.userTaskFor(taskId)?.canCaptureMoreDemo() == true
+        handingOff = moreToCapture
         UploadActivity.start(
             this,
             taskId,

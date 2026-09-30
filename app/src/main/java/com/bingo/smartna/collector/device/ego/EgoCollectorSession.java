@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.bingo.smartna.collector.data.Prefs;
 import com.bingo.smartna.collector.device.ego.view.OBGLView;
@@ -180,6 +181,17 @@ public final class EgoCollectorSession {
         if (doRelease) {
             worker.execute(this::fullRelease);
         }
+    }
+
+    /** 没有页面附着时释放设备，避免上传后离开采集链路泄漏。 */
+    public void releaseIfIdle() {
+        synchronized (lock) {
+            if (activity != null || releasing) {
+                return;
+            }
+            releasing = true;
+        }
+        worker.execute(this::fullRelease);
     }
 
     public boolean startCollecting() {
@@ -609,6 +621,15 @@ public final class EgoCollectorSession {
             }
             bindEye(leftFormat == Format.YUYV, t.leftTv, t.left);
             bindEye(stereo && rightFormat == Format.YUYV, t.rightTv, t.right);
+            View slot = t.leftTv != null ? t.leftTv : t.left;
+            if (slot != null) {
+                slot.post(() -> {
+                    adjustViewAspect(t.leftTv, leftW, leftH);
+                    if (stereo) {
+                        adjustViewAspect(t.rightTv, rightW, rightH);
+                    }
+                });
+            }
             glPaused = false;
         });
     }
@@ -627,6 +648,36 @@ public final class EgoCollectorSession {
             pauseGl(gl);
             gl.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * 把 TextureView 收成帧的宽高比（contain），避免 match_parent 把画面拉扁/拉长。
+     * 与 {@link EgoSampleNetActivity} / {@link OBGLView} 同一套算法。
+     */
+    private void adjustViewAspect(TextureView view, int frameW, int frameH) {
+        if (view == null || frameW <= 0 || frameH <= 0) {
+            return;
+        }
+        view.post(() -> {
+            ViewGroup parent = (ViewGroup) view.getParent();
+            if (parent == null) {
+                return;
+            }
+            if (parent.getWidth() <= 0 || parent.getHeight() <= 0) {
+                parent.post(() -> adjustViewAspect(view, frameW, frameH));
+                return;
+            }
+            int targetWidth = parent.getWidth();
+            int targetHeight = parent.getWidth() * frameH / frameW;
+            if (targetHeight > parent.getHeight()) {
+                targetHeight = parent.getHeight();
+                targetWidth = parent.getHeight() * frameW / frameH;
+            }
+            ViewGroup.LayoutParams params = view.getLayoutParams();
+            params.width = targetWidth;
+            params.height = targetHeight;
+            view.setLayoutParams(params);
+        });
     }
 
     private void pauseGl(OBGLView view) {

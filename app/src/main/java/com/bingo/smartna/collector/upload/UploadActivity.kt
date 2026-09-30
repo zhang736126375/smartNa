@@ -11,6 +11,7 @@ import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.CollectorViewModels
 import com.bingo.smartna.collector.capture.CaptureActivity
 import com.bingo.smartna.collector.data.mock.MockDataSource
+import com.bingo.smartna.collector.device.ego.EgoCollectorSession
 import com.bingo.smartna.databinding.ActivityUploadBinding
 import com.blankj.utilcode.util.ClickUtils
 import kotlinx.coroutines.delay
@@ -23,6 +24,7 @@ class UploadActivity : BaseActivity<ActivityUploadBinding, CollectorViewModel>()
     private var clipIndex: Int = 1
     private var durationMs: Long = 0L
     private var uploading = false
+    private var continueCapture = false
 
     override fun inflateBinding() = ActivityUploadBinding.inflate(layoutInflater)
 
@@ -64,6 +66,7 @@ class UploadActivity : BaseActivity<ActivityUploadBinding, CollectorViewModel>()
             val task = MockDataSource.allTasks.find { it.id == taskId }
                 ?: viewModel.ui.value?.userTaskFor(taskId)?.task
             if (task != null) {
+                continueCapture = true
                 CaptureActivity.start(this, task)
             }
             finish()
@@ -72,6 +75,13 @@ class UploadActivity : BaseActivity<ActivityUploadBinding, CollectorViewModel>()
             if (!uploading) startFakeUpload()
         }
         startFakeUpload()
+    }
+
+    override fun onDestroy() {
+        if (!continueCapture && !isChangingConfigurations) {
+            EgoCollectorSession.get().releaseIfIdle()
+        }
+        super.onDestroy()
     }
 
     private fun startFakeUpload() {

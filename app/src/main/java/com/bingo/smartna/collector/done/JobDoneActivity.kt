@@ -3,11 +3,10 @@ package com.bingo.smartna.collector.done
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import com.bingo.smartna.MainActivity
 import com.bingo.smartna.R
 import com.bingo.smartna.base.ui.BaseActivity
 import com.bingo.smartna.base.ui.BaseViewModel
-import com.bingo.smartna.collector.data.mock.MockDataSource
-import com.bingo.smartna.collector.hall.TaskDetailActivity
 import com.bingo.smartna.databinding.ActivityJobDoneBinding
 import com.blankj.utilcode.util.ClickUtils
 
@@ -27,9 +26,7 @@ class JobDoneActivity : BaseActivity<ActivityJobDoneBinding, BaseViewModel>() {
             Toast.makeText(this, R.string.job_done_share_toast, Toast.LENGTH_SHORT).show()
         }
         ClickUtils.applySingleDebouncing(binding.btnNext) {
-            val next = MockDataSource.allTasks.firstOrNull { it.id == "t_demo" }
-                ?: MockDataSource.allTasks.first()
-            TaskDetailActivity.start(this, next)
+            startActivity(MainActivity.intentForTab(this, R.id.nav_hall))
             finish()
         }
     }

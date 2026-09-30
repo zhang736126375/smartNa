@@ -128,12 +128,14 @@
                     <TextureView
                         android:id="@+id/tvLeft"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center" />
 
                     <com.bingo.smartna.collector.device.ego.view.OBGLView
                         android:id="@+id/glLeft"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center" />
                 </FrameLayout>
 
                 <FrameLayout
@@ -145,12 +147,14 @@
                     <TextureView
                         android:id="@+id/tvRight"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center" />
 
                     <com.bingo.smartna.collector.device.ego.view.OBGLView
                         android:id="@+id/glRight"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center" />
                 </FrameLayout>
             </LinearLayout>
 
