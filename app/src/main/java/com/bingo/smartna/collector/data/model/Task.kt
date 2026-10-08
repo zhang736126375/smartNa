@@ -72,7 +72,9 @@ data class Task(
     val priority: TaskPriority,
     val durationMax: Int = 90,
     val claimedCount: Int = 0,
-    val coverRes: Int = R.drawable.bg_cover_warm
+    val coverRes: Int = R.drawable.bg_cover_warm,
+    /** 封面地址。接口字段；Mock 用本地可解析的 URL，空字符串表示无图。 */
+    val coverUrl: String = ""
 ) {
     val sceneGroupName: String
         get() = sceneParts.firstOrNull().orEmpty().ifBlank { scene }

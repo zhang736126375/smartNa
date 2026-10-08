@@ -27,6 +27,7 @@ class ClaimSuccessActivity : BaseActivity<ActivityClaimSuccessBinding, BaseViewM
             if (hasDevice) R.string.claim_go_debug else R.string.claim_connect_device
         )
         ClickUtils.applySingleDebouncing(binding.backdrop) { finish() }
+        ClickUtils.applySingleDebouncing(binding.btnBack) { finish() }
         ClickUtils.applySingleDebouncing(binding.btnPrimary) {
             if (hasDevice) {
                 CameraDebugActivity.start(this, taskId)

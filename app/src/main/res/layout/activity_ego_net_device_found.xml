@@ -95,6 +95,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center"
+                        android:visibility="gone"
                         android:text="@string/ego_found_scan_qr"
                         android:textColor="@color/white"
                         android:textSize="17sp"

@@ -356,6 +356,7 @@
     <string name="teach_video_playing">演示播放中…</string>
     <string name="teach_video_done">示教完成</string>
     <string name="teach_video_close">关闭</string>
+    <string name="teach_video_error">教程视频无法播放</string>
 
     <string name="wallet_balance_label">可提取余额（元）</string>
     <string name="wallet_balance">¥%1$.2f</string>

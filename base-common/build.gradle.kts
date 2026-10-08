@@ -3,12 +3,14 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val androidConfig = rootProject.extra["androidConfig"] as Map<*, *>
+
 android {
     namespace = "com.bingo.smartna.base"
-    compileSdk = 34
+    compileSdk = (androidConfig["compileSdk"] as Number).toInt()
 
     defaultConfig {
-        minSdk = 24
+        minSdk = (androidConfig["minSdk"] as Number).toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }

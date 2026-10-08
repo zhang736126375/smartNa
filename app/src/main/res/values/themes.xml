@@ -37,6 +37,16 @@
         <item name="android:navigationBarColor">@color/capture_hud</item>
     </style>
 
+    <style name="Theme.SmartNa.TeachVideo" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
     <style name="Theme.SmartNa.Login" parent="Theme.SmartNa">
         <item name="android:statusBarColor">@color/brand_primary</item>
         <item name="android:windowLightStatusBar">false</item>

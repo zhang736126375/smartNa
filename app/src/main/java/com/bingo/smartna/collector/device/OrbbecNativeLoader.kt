@@ -2,7 +2,7 @@ package com.bingo.smartna.collector.device
 
 import android.util.Log
 
-/** 按 Orbbec SDK 要求预加载 libc++ 与 native 库，避免与 coresdk 的 STL 冲突。 */
+/** 按 Orbbec SDK 要求预加载 libc++ 与 native 库。 */
 object OrbbecNativeLoader {
 
     private const val TAG = "OrbbecNativeLoader"

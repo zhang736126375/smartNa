@@ -5,6 +5,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val androidConfig = rootProject.extra["androidConfig"] as Map<*, *>
+
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) {
@@ -14,14 +16,14 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "com.bingo.smartna"
-    compileSdk = 34
+    compileSdk = (androidConfig["compileSdk"] as Number).toInt()
 
     defaultConfig {
         applicationId = "com.bingo.smartna"
-        minSdk = 24
-        targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = (androidConfig["minSdk"] as Number).toInt()
+        targetSdk = (androidConfig["targetSdk"] as Number).toInt()
+        versionCode = (androidConfig["versionCode"] as Number).toInt()
+        versionName = androidConfig["versionName"] as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
@@ -80,7 +82,7 @@ android {
     }
     packaging {
         jniLibs {
-            // app/jniLibs 中放置 Orbbec AAR 自带的 libc++_shared，避免 coresdk 版本导致符号缺失
+            // app/jniLibs 中放置 Orbbec AAR 自带的 libc++_shared
             pickFirsts += setOf(
                 "**/libc++_shared.so",
                 "**/libOrbbecSDK.so",
@@ -94,7 +96,6 @@ android {
 
 dependencies {
     implementation(project(":base-common"))
-    implementation(project(":coresdk"))
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.7.1")

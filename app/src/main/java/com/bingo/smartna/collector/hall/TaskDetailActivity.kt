@@ -13,6 +13,7 @@ import com.bingo.smartna.collector.CollectorViewModel
 import com.bingo.smartna.collector.CollectorViewModels
 import com.bingo.smartna.collector.data.Prefs
 import com.bingo.smartna.collector.data.mock.MockDataSource
+import com.bingo.smartna.collector.data.mock.TaskCover
 import com.bingo.smartna.collector.data.model.Task
 import com.bingo.smartna.collector.data.model.UserRole
 import com.bingo.smartna.databinding.ActivityTaskDetailBinding
@@ -56,6 +57,14 @@ class TaskDetailActivity : BaseActivity<ActivityTaskDetailBinding, CollectorView
     private fun bindContent() {
         val state = viewModel.ui.value
         val quotaLeft = state?.quotaLeft?.get(task.id) ?: task.quotaTotal
+        val photo = TaskCover.localRes(task.coverUrl)
+        if (photo != null) {
+            binding.cover.setImageResource(photo)
+            binding.coverSilhouette.visibility = View.GONE
+        } else {
+            binding.cover.setImageDrawable(null)
+            binding.coverSilhouette.visibility = View.VISIBLE
+        }
         binding.cover.setBackgroundResource(R.drawable.bg_cover_wood_flat)
         binding.tvScenePill.text = task.scene.replace("-", " · ").replace("场景", "")
         binding.tvTaskTitle.text = task.title.replace("【Demo】", "")

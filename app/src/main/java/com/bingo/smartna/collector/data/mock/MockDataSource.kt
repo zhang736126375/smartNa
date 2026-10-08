@@ -33,7 +33,7 @@ object MockDataSource {
         ),
         Task(
             id = "t1",
-            title = "住宅小区｜收纳整理定制采集",
+            title = "厨房｜餐具收纳整理",
             scene = "居住场景-住宅小区",
             device = "MEgo",
             settle = "按有效采集时长结算",
@@ -102,8 +102,8 @@ object MockDataSource {
         ),
         Task(
             id = "t5",
-            title = "果园 | 果园采摘动作采集",
-            scene = "农业生产场景-果园",
+            title = "大棚 | 温室蔬菜管护采集",
+            scene = "农业生产场景-大棚",
             device = "MEgo",
             settle = "按有效采集时长结算",
             duration = "30~90分钟",
@@ -340,7 +340,22 @@ object MockDataSource {
         )
     )
 
-    val tasks: List<Task> = seedTasks + generatedTasks()
+    val tasks: List<Task> = run {
+        val all = (seedTasks + generatedTasks()).map { task ->
+            val coverUrl = TaskCover.ofScene(task.scene, task.title)
+            if (coverUrl.isEmpty()) task else task.copy(coverUrl = coverUrl)
+        }
+        val coverRank = listOf(
+            TaskCover.BEDROOM_STORAGE,
+            TaskCover.KITCHEN_STORAGE,
+            TaskCover.GREENHOUSE,
+            TaskCover.SUPERMARKET_STORAGE
+        )
+        all.sortedBy { task ->
+            val rank = coverRank.indexOf(task.coverUrl)
+            if (rank >= 0) rank else coverRank.size
+        }
+    }
 
     val allTasks: List<Task> = tasks
 

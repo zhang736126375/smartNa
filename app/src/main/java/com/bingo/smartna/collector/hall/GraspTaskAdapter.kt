@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bingo.smartna.R
 import com.bingo.smartna.collector.CollectorUiState
+import com.bingo.smartna.collector.data.mock.TaskCover
 import com.bingo.smartna.collector.data.model.HallCategory
 import com.bingo.smartna.collector.data.model.Task
 import com.bingo.smartna.collector.data.model.TaskPriority
@@ -52,7 +53,7 @@ class GraspTaskAdapter(
             val context = binding.root.context
             val claimed = state?.claimedIds?.contains(task.id) == true
             val quotaLeft = state?.quotaLeft?.get(task.id) ?: task.quotaTotal
-            binding.cover.setBackgroundResource(coverOf(task))
+            bindCover(task)
             binding.tvScenePill.text = task.scene.replace("-", " · ")
             binding.tvTitle.text = task.title.replace("【Demo】", "")
             binding.tvMeta.text = metaText(task, quotaLeft)
@@ -128,6 +129,16 @@ class GraspTaskAdapter(
             } else {
                 String.format(Locale.CHINA, "¥%.2f", reward)
             }
+        }
+
+        private fun bindCover(task: Task) {
+            val photo = TaskCover.localRes(task.coverUrl)
+            if (photo != null) {
+                binding.cover.setImageResource(photo)
+            } else {
+                binding.cover.setImageDrawable(null)
+            }
+            binding.cover.setBackgroundResource(coverOf(task))
         }
 
         private fun coverOf(task: Task): Int = when (task.category) {

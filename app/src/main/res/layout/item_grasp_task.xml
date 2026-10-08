@@ -13,11 +13,13 @@
             android:layout_width="match_parent"
             android:layout_height="104dp">
 
-            <View
+            <ImageView
                 android:id="@+id/cover"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/bg_cover_warm_flat" />
+                android:background="@drawable/bg_cover_warm_flat"
+                android:contentDescription="@null"
+                android:scaleType="centerCrop" />
 
             <TextView
                 android:id="@+id/tvScenePill"

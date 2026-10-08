@@ -2,7 +2,6 @@ package com.bingo.smartna
 
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
-import com.bingo.coresdk.CoreSdk
 import com.bingo.smartna.base.BaseApplication
 
 class SmartNaApplication : BaseApplication(), ViewModelStoreOwner {
@@ -15,12 +14,10 @@ class SmartNaApplication : BaseApplication(), ViewModelStoreOwner {
     override fun onCreate() {
         super.onCreate()
         preloadSharedCppRuntime()
-        // 进程里只做一次 loadLibrary；消息 Handler 由各业务单例自己挂
-        CoreSdk.init()
         initRetrofit(BASE_URL, debug = BuildConfig.DEBUG)
     }
 
-    /** 优先加载 app/jniLibs 中与 Orbbec SDK 匹配的 libc++，避免 coresdk 版本抢占符号。 */
+    /** 优先加载 app/jniLibs 中与 Orbbec SDK 匹配的 libc++。 */
     private fun preloadSharedCppRuntime() {
         try {
             System.loadLibrary("c++_shared")

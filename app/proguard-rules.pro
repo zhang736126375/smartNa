@@ -22,9 +22,6 @@
 # --- 业务模型（Mock / 后续接口 DTO） ---
 -keep class com.bingo.smartna.collector.data.model.** { *; }
 
-# --- coresdk JNI ---
--keep class com.bingo.coresdk.** { *; }
-
 # --- Orbbec Ego SDK ---
 -keep class com.orbbec.obsensor.** { *; }
 -dontwarn com.orbbec.obsensor.**

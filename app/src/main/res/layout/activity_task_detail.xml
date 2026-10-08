@@ -24,33 +24,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="196dp">
 
-                <View
+                <ImageView
                     android:id="@+id/cover"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/bg_cover_wood_flat" />
+                    android:background="@drawable/bg_cover_wood_flat"
+                    android:contentDescription="@null"
+                    android:scaleType="centerCrop" />
 
-                <View
-                    android:layout_width="150dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="bottom|start"
-                    android:layout_marginStart="30dp"
-                    android:background="@drawable/bg_sil" />
+                <FrameLayout
+                    android:id="@+id/coverSilhouette"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-                <View
-                    android:layout_width="90dp"
-                    android:layout_height="60dp"
-                    android:layout_gravity="bottom|start"
-                    android:layout_marginStart="200dp"
-                    android:background="@drawable/bg_sil_dk" />
+                    <View
+                        android:layout_width="150dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="bottom|start"
+                        android:layout_marginStart="30dp"
+                        android:background="@drawable/bg_sil" />
 
-                <View
-                    android:layout_width="50dp"
-                    android:layout_height="70dp"
-                    android:layout_gravity="bottom|end"
-                    android:layout_marginEnd="36dp"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/bg_sil" />
+                    <View
+                        android:layout_width="90dp"
+                        android:layout_height="60dp"
+                        android:layout_gravity="bottom|start"
+                        android:layout_marginStart="200dp"
+                        android:background="@drawable/bg_sil_dk" />
+
+                    <View
+                        android:layout_width="50dp"
+                        android:layout_height="70dp"
+                        android:layout_gravity="bottom|end"
+                        android:layout_marginEnd="36dp"
+                        android:layout_marginBottom="20dp"
+                        android:background="@drawable/bg_sil" />
+                </FrameLayout>
 
                 <FrameLayout
                     android:layout_width="match_parent"

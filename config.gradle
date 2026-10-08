@@ -1,0 +1,13 @@
+// 各模块共用的 Android 版本号。改这里即可，不要在模块 build.gradle.kts 里再写死。
+ext {
+    androidConfig = [
+            compileSdk     : 34,
+            minSdk         : 24,
+            targetSdk      : 33,
+            versionCode    : 1,
+            versionName    : "1.0",
+            // nng-android-release.aar 声明 minSdk 34，设备模块不能低于它
+            deviceMinSdk   : 34,
+            deviceTargetSdk: 34,
+    ]
+}

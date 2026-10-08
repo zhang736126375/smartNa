@@ -1,56 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/teachScrim"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/bg_card"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:layout_height="match_parent"
+    android:background="#99000000">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/teach_video_title"
-        android:textColor="@color/text_dark"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <FrameLayout
+    <LinearLayout
+        android:id="@+id/videoCard"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_video_placeholder">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tvTeachCounter"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="1"
-            android:textColor="@color/card_white"
-            android:textSize="72sp"
+            android:layout_marginBottom="12dp"
+            android:gravity="center"
+            android:text="@string/grasp_detail_video_title"
+            android:textColor="@color/white"
+            android:textSize="16sp"
             android:textStyle="bold" />
-    </FrameLayout>
 
-    <TextView
-        android:id="@+id/tvTeachStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:gravity="center"
-        android:text="@string/teach_video_playing"
-        android:textColor="@color/text_gray"
-        android:textSize="13sp" />
+        <FrameLayout
+            android:id="@+id/videoFrame"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            android:background="#FF000000">
 
-    <TextView
-        android:id="@+id/btnTeachClose"
-        android:layout_width="match_parent"
-        android:layout_height="46dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/bg_btn_primary"
-        android:gravity="center"
-        android:text="@string/teach_video_close"
-        android:textColor="@color/card_white"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-</LinearLayout>
+            <SurfaceView
+                android:id="@+id/teachVideo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ImageView
+                android:id="@+id/btnPlay"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_circle_scrim"
+                android:contentDescription="@string/teach_video_playing"
+                android:padding="18dp"
+                android:src="@drawable/ic_play" />
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>

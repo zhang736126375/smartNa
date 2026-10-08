@@ -16,5 +16,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "smartNa"
 include(":app")
-include(":coresdk")
 include(":base-common")
+include(":device-sdk")
+include(":device-sdk:obsensor-aar")
+include(":device-sdk:nng-aar")
+include(":device-sdk-demo")
